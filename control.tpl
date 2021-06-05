@@ -6,34 +6,38 @@
 # If deviating from default paths, a full path must be specified. E.g. '/home/user/non-default/path'
 
 ## ---- PART 1. Common path settings ---- 
-root_path              | /Users/hongliliu/Documents/prj/5_summaCalib/5_calib_test  # root path where parameter estimation will be stored.
+root_path              | /Users/hongliliu/Documents/proj/5_summaCalib/5_calib_test  # root path where parameter estimation will be stored.
 domain_name            | BowAtBanff   # use as the domain folder name for the prepared data.
 
 ## ---- PART 2. Hydrologic model settings  ---- 
-model_src_path         | /Users/hongliliu/Documents/prj/3_summaWorkflow/domain_BowAtBanff # path of source hydrologic model.
+model_src_path         | /Users/hongliliu/Documents/proj/3_summaWorkflow/domain_BowAtBanff # path of source hydrologic model.
 model_dst_path         | default               # path of destination hydrologic model. If 'default', use '[root_path]/[domain_name]/model'.
 summa_filemanager      | fileManager.txt       # Name of the SUMMA master configuration file.
-summa_basinParam       | basinParamInfo.txt    # Name of the file with default basin parameter values. 
-summa_localParam       | localParamInfo.txt    # Name of the file with default local parameter values. 
-summa_trialParams      | trialParams.nc        # Name of the file with specific parameter values. 
-summa_attributes       | attributes.nc         # Name of the attributes file.
-summa_coldstate        | coldState.nc          # Name of the file with intial states.
-summa_outputControl    | outputControl.txt     # Name of the file that can contain trial parameter values 
-summa_forcing_list     | forcingFileList.txt   # Name of the file that has the list of forcing files.
-
-summa_exe_path         | /Users/hongliliu/Documents/github/summa/bin/summa.exe  # summa executable path
+mizuroute_control      | mizuroute.control     # Name of the mizuRoute configuration file.
+summa_exe_path         | /Users/hongliliu/Documents/github/summa/bin/summa.exe                   # summa executable path
 mizuroute_exe_path     | /Users/hongliliu/Documents/github/mizuroute/route/bin/mizuroute.exe     # muziroute executable path.
-simStartTime           | 2008-01-01 00:00      # simualtion start time for parameter estimation. 
-simEndTime             | 2008-01-31 23:00      # simualtion end time for parameter estimation. 
+simStartTime           | 2008-01-01 00:00      # simualtion start time for parameter estimation, in format yyyy-mm-dd hh:mm. 
+simEndTime             | 2008-01-05 23:00      # simualtion end time for parameter estimation, in format yyyy-mm-dd hh:mm.  
+nGRU                   | 51                    # number of GRUs for whole basin, can query with ncinfo -d gru <attributes_file>.
 
 ## ---- PART 3. Evaluated parameter settings ---- 
-object_parameters         | k_macropore, k_soil, theta_sat, aquiferBaseflowExp, aquiferBaseflowRate, qSurfScale, summerLAI, frozenPrecipMultip, heightCanopyBottom, heightCanopyTop, routingGammaScale, routingGammaShape, Fcapil # parameters to be optimized or evaluated.
-summa_trialParams_priori  | trialParams.priori.nc    # Name of the a priori trial parameter file.
-simStartTime_priori       | 2008-01-01 00:00         # simualtion start time to get a priori param set.
-simEndTime_priori         | 2008-01-02 23:00         # simualtion end time to get a priori param set.
+object_parameters      | k_macropore, k_soil, theta_sat, aquiferBaseflowExp, aquiferBaseflowRate, qSurfScale, summerLAI, frozenPrecipMultip, heightCanopyBottom, heightCanopyTop, routingGammaScale, routingGammaShape, Fcapil # parameters to be optimized or evaluated.
 
 ## ---- PART 4. Paramerter estimation settings ---- 
-calib_path               | default                      # path of parameter estimation. If 'default', use '[root_path]/[domain_name]/calib'.
-param_bounds             | summa_parameter_bounds.txt   # Name of summa parameter bounds file. 
-multp_bounds             | multiplier_bounds.txt        # Name of evaluateed multiplier bounds file. 
-max_iterations           | 3	                        # Maximum Number of iterations for optimization.
+calib_path             | default                      # path of parameter estimation. If 'default', use '[root_path]/[domain_name]/calib'.
+param_bounds           | summa_parameter_bounds.txt   # Name of file with summa parameter bounds. Workflow output in [calib_path].
+multp_bounds           | multiplier_bounds.txt        # Name of file with multiplier bounds. Workflow output in [calib_path].
+multp_tpl              | multipliers.tpl              # Name of file with a list of multiplier names. Workflow output in [calib_path]/tpl.
+multp_value            | multipliers.txt              # Name of file with a list of multiplier values. Workflow output in [calib_path].
+
+ostrich_exe_path       | /Users/hongliliu/Documents/github/Ostrich_v17.12.19/Source/OstrichGCC # Path of Ostrich executable.
+experiment_id          | 1	                          # Optimization experiment ID, used to archive optimization results.
+max_iterations         | 10	                          # Maximum Number of iterations for optimization. Optional, depending on the optimization method.
+
+## ---- PART 5. Calculate statistics settings ----
+q_seg_index            | 51                           # segment index in routing file matching obs location (start from 1).
+obs_file               | /Users/hongliliu/Documents/proj/5_summaCalib/obs/obs_flow.BowRiveratBanff.cfs.csv  # path of observed streamflow data.
+obs_unit               | cfs                          # observation streamflow data unit (cfs or cms).
+stat_output            | trial_stats.txt              # Name of file with statistical metric results.
+statStartDate          | 2008-01-01                   # Start date of statistics calculation period, in format yyyy-mm-dd. 
+statEndDate            | 2008-01-05                   # End date of statistics calculation period, in format yyyy-mm-dd.  
