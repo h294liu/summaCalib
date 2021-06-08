@@ -68,7 +68,7 @@ def read_from_control(control_file, setting):
     return substring
        
 # Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
+def read_from_summa_route_control(control_file, setting):
 
     # Open fileManager.txt or route_control and locate the line with setting
     with open(control_file) as ff:
@@ -107,9 +107,10 @@ if __name__ == '__main__':
         model_dst_path = os.path.join(domain_path, 'model')
 
     # read mizuRoute setting and control files paths from control_file.
-    mizuroute_setting_path = os.path.join(model_dst_path, 'settings/mizuRoute')
-    mizuroute_control = read_from_control(control_file, 'mizuroute_control')
-    mizuroute_control = os.path.join(mizuroute_setting_path, mizuroute_control)
+    route_settings_relpath = read_from_control(control_file, 'route_settings_relpath')
+    route_settings_path = os.path.join(model_dst_path, route_settings_relpath)
+    route_control = read_from_control(control_file, 'route_control')
+    route_control = os.path.join(route_settings_path, route_control)
 
     # read calib path from control_file.
     calib_path = read_from_control(control_file, 'calib_path')
@@ -119,9 +120,9 @@ if __name__ == '__main__':
 
     # #### 1. Read input and output arguments 
     # (input) mizuRoute output file
-    output_dir = read_from_summa_mizuRoute_control(mizuroute_control, '<output_dir>')
-    case_name = read_from_summa_mizuRoute_control(mizuroute_control, '<case_name>')
-    sim_start = read_from_summa_mizuRoute_control(mizuroute_control, '<sim_start>')
+    output_dir = read_from_summa_route_control(route_control, '<output_dir>')
+    case_name = read_from_summa_route_control(route_control, '<case_name>')
+    sim_start = read_from_summa_route_control(route_control, '<sim_start>')
     
     # (input) define mizuRoute output file name based on mizuRoute source code "write_simoutput.f90".
     sim_start_datetime = datetime.datetime.strptime(sim_start,'%Y-%m-%d %H:%M')

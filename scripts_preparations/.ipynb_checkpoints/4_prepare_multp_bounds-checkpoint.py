@@ -35,7 +35,7 @@ def read_from_control(control_file, setting):
     return substring
 
 # Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
+def read_from_summa_route_control(control_file, setting):
 
     # Open fileManager.txt or route_control and locate the line with setting
     with open(control_file) as ff:
@@ -121,8 +121,8 @@ if __name__ == '__main__':
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
     summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
 
-    basinParam = read_from_summa_mizuRoute_control(summa_filemanager, 'globalGruParamFile')
-    localParam = read_from_summa_mizuRoute_control(summa_filemanager, 'globalHruParamFile')
+    basinParam = read_from_summa_route_control(summa_filemanager, 'globalGruParamFile')
+    localParam = read_from_summa_route_control(summa_filemanager, 'globalHruParamFile')
 
     basinParam = os.path.join(summa_setting_path, basinParam)
     localParam = os.path.join(summa_setting_path, localParam)

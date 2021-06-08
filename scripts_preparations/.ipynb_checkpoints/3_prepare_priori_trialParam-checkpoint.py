@@ -35,7 +35,7 @@ def read_from_control(control_file, setting):
     return substring
 
 # Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
+def read_from_summa_route_control(control_file, setting):
 
     # Open fileManager.txt or route_control and locate the line with setting
     with open(control_file) as ff:
@@ -72,7 +72,8 @@ if __name__ == '__main__':
     model_dst_path = read_from_control(control_file, 'model_dst_path')
     if model_dst_path == 'default':
         model_dst_path = os.path.join(domain_path, 'model')
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_setting_path = os.path.join(model_dst_path, summa_settings_relpath)
 
 
     # #### 1. Update summa outputControl.txt by adding parameter names.
@@ -89,7 +90,7 @@ if __name__ == '__main__':
 
     # identify outputControl.txt and a temporary file.
     summa_filemanager = os.path.join(summa_setting_path, read_from_control(control_file, 'summa_filemanager'))
-    outputControlFile = read_from_summa_mizuRoute_control(summa_filemanager, 'outputControlFile')
+    outputControlFile = read_from_summa_route_control(summa_filemanager, 'outputControlFile')
 
     outputControlFile_temp = outputControlFile.split('.txt')[0]+'_temp.txt'
     outputControlFile = os.path.join(summa_setting_path, outputControlFile)
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     summa_exe_path = read_from_control(control_file, 'summa_exe_path')
 
     # create summa output path if it does not exist.
-    outputPath = read_from_summa_mizuRoute_control(summa_filemanager, 'outputPath')
+    outputPath = read_from_summa_route_control(summa_filemanager, 'outputPath')
     if not os.path.exists(outputPath):
         print('outputPath does not exist. Create it.')
         os.makedirs(outputPath)
@@ -152,16 +153,16 @@ if __name__ == '__main__':
 
     # #### 4. Extract a priori parameter values from summa output and generate trialParam.priori.nc.
     # specify summa output, attribtue, and trialParam files
-    outFilePrefix = read_from_summa_mizuRoute_control(summa_filemanager, 'outFilePrefix')
+    outFilePrefix = read_from_summa_route_control(summa_filemanager, 'outFilePrefix')
     summa_ofile = os.path.join(outputPath, outFilePrefix+'_timestep.nc')
 
-    trialParamFile = read_from_summa_mizuRoute_control(summa_filemanager, 'trialParamFile')
+    trialParamFile = read_from_summa_route_control(summa_filemanager, 'trialParamFile')
     trialParamFile_priori = trialParamFile.split('.nc')[0] + '.priori.nc' # a priori param file
 
     trialParamFile = os.path.join(summa_setting_path, trialParamFile)
     trialParamFile_priori = os.path.join(summa_setting_path, trialParamFile_priori)
 
-    attributeFile = read_from_summa_mizuRoute_control(summa_filemanager,'attributeFile')
+    attributeFile = read_from_summa_route_control(summa_filemanager,'attributeFile')
     attributeFile = os.path.join(summa_setting_path, attributeFile)
 
     # open summa output file for reading

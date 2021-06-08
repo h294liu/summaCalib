@@ -17,6 +17,8 @@
 script_folder=scripts
 control_active=control_active.txt
 
+module load nco
+
 # Update summa and mizuRoute sim start/end time based on control_active.txt.
 python ${script_folder}/1_update_model_StartEndTime.py $control_active
 

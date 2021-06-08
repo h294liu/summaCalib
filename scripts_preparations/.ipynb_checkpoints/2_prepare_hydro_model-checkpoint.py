@@ -79,11 +79,12 @@ if __name__ == '__main__':
         dst = os.path.join(model_dst_path, folder)
         if os.path.islink(dst):
             os.unlink(dst)
-            os.symlink(scr, dst)
+        os.symlink(scr, dst)
 
     
     # #### 4. Update model paths in settings/SUMMA/fileManager.txt 
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_setting_path = os.path.join(model_dst_path, summa_settings_relpath)
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
     summa_filemanager_temp = summa_filemanager.split('.txt')[0]+'_temp.txt'
 
@@ -100,8 +101,9 @@ if __name__ == '__main__':
     os.remove(summa_filemanager_temp);
 
     # #### 5. Update model paths in settings/mizuRoute/mizuroute.control
-    route_setting_path = os.path.join(model_dst_path, 'settings/mizuRoute')
-    route_control = read_from_control(control_file, 'mizuroute_control')
+    route_settings_relpath = read_from_control(control_file, 'route_settings_relpath')
+    route_setting_path = os.path.join(model_dst_path, route_settings_relpath)
+    route_control = read_from_control(control_file, 'route_control')
     route_control_temp = route_control.split('.txt')[0]+'_temp.txt'
 
     route_control = os.path.join(route_setting_path, route_control)

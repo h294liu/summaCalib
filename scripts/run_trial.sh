@@ -19,7 +19,7 @@ read_from_control () {
     echo $info
 }
 
-read_from_summa_mizuRoute_control () {
+read_from_summa_route_control () {
     input_file=$1
     setting=$2
     
@@ -46,30 +46,33 @@ if [ "$calib_path" = "default" ]; then calib_path="${domain_path}/calib"; fi
 # Get model and settings paths.
 model_path="$(read_from_control $control_file "model_dst_path")"
 if [ "$model_path" = "default" ]; then model_path="${domain_path}/model"; fi
-summa_settings=$model_path/settings/SUMMA  # Be careful! Hard coded.
-mizuRoute_settings=$model_path/settings/mizuRoute
+
+summa_settings_relpath="$(read_from_control $control_file "summa_settings_relpath")"
+summa_settings_path=$model_path/$summa_settings_relpath
+route_settings_relpath="$(read_from_control $control_file "route_settings_relpath")"
+route_settings_path=$model_path/$route_settings_relpath
 
 # Get summa and mizuRoute controls/fileManager files.
 summa_filemanager="$(read_from_control $control_file "summa_filemanager")"
-summa_filemanager=$summa_settings/$summa_filemanager
-route_control="$(read_from_control $control_file "mizuroute_control")"
-route_control=$mizuRoute_settings/$route_control
+summa_filemanager=$summa_settings_path/$summa_filemanager
+route_control="$(read_from_control $control_file "route_control")"
+route_control=$route_settings_path/$route_control
 
 # Get summa and mizuRoute executable paths.
 summaExe="$(read_from_control $control_file "summa_exe_path")"
-routeExe="$(read_from_control $control_file "mizuroute_exe_path")"
+routeExe="$(read_from_control $control_file "route_exe_path")"
 
 # Get numebr of GRUs for the whole basin (used for splitting summa run).
 nGRU="$(read_from_control $control_file "nGRU")"
 nCoresPerJob=1  # splits domain into 1 gru per job for now.
 
 # Extract summa output path and prefix from fileManager.txt (use to remove summa outputs).
-summa_outputPath="$(read_from_summa_mizuRoute_control $summa_filemanager "outputPath")"
-summa_outFilePrefix="$(read_from_summa_mizuRoute_control $summa_filemanager "outFilePrefix")"
+summa_outputPath="$(read_from_summa_route_control $summa_filemanager "outputPath")"
+summa_outFilePrefix="$(read_from_summa_route_control $summa_filemanager "outFilePrefix")"
 
 # Extract mizuRoute output path and prefix from route_control (use for removing outputs).
-route_outputPath="$(read_from_summa_mizuRoute_control $route_control "<output_dir>")"
-route_outFilePrefix="$(read_from_summa_mizuRoute_control $route_control "<case_name>")"
+route_outputPath="$(read_from_summa_route_control $route_control "<output_dir>")"
+route_outFilePrefix="$(read_from_summa_route_control $route_control "<case_name>")"
 
 # Get statistical output file from control_file.
 stat_output="$(read_from_control $control_file "stat_output")"

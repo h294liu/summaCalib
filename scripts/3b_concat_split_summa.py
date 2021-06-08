@@ -29,7 +29,7 @@ def read_from_control(control_file, setting):
     return substring
        
 # Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
+def read_from_summa_route_control(control_file, setting):
 
     # Open fileManager.txt or route_control and locate the line with setting
     with open(control_file) as ff:
@@ -67,13 +67,14 @@ if __name__ == '__main__':
         model_dst_path = os.path.join(domain_path, 'model')
 
     # read summa settings and fileManager paths from control_file.
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_settings_path = os.path.join(model_dst_path, summa_settings_relpath)
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
-    summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
+    summa_filemanager = os.path.join(summa_settings_path, summa_filemanager)
 
     # read summa output path and prefix
-    outputPath = read_from_summa_mizuRoute_control(summa_filemanager, 'outputPath')
-    outFilePrefix = read_from_summa_mizuRoute_control(summa_filemanager, 'outFilePrefix')
+    outputPath = read_from_summa_route_control(summa_filemanager, 'outputPath')
+    outFilePrefix = read_from_summa_route_control(summa_filemanager, 'outFilePrefix')
     
     # -----------------------------------------------------------------------
 

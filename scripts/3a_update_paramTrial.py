@@ -35,7 +35,7 @@ def read_from_control(control_file, setting):
     return substring
        
 # Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
+def read_from_summa_route_control(control_file, setting):
 
     # Open fileManager.txt or route_control and locate the line with setting
     with open(control_file) as ff:
@@ -75,9 +75,10 @@ if __name__ == '__main__':
         model_dst_path = os.path.join(domain_path, 'model')
 
     # read summa settings and fileManager paths from control_file.
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_settings_path = os.path.join(model_dst_path, summa_settings_relpath)
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
-    summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
+    summa_filemanager = os.path.join(summa_settings_path, summa_filemanager)
 
     # read calib path from control_file.
     calib_path = read_from_control(control_file, 'calib_path')
@@ -99,12 +100,12 @@ if __name__ == '__main__':
     multp_txt = os.path.join(calib_path, multp_txt)
 
     # (output) summa utilized param file
-    trialParamFile = read_from_summa_mizuRoute_control(summa_filemanager, 'trialParamFile')
-    trialParamFile = os.path.join(summa_setting_path, trialParamFile)
+    trialParamFile = read_from_summa_route_control(summa_filemanager, 'trialParamFile')
+    trialParamFile = os.path.join(summa_settings_path, trialParamFile)
 
     # (input) summa a priori param file 
     trialParamFile_priori = trialParamFile.split('.nc')[0] + '.priori.nc' # a priori param file
-    trialParamFile_priori = os.path.join(summa_setting_path, trialParamFile_priori)
+    trialParamFile_priori = os.path.join(summa_settings_path, trialParamFile_priori)
 
     # #### 2. Read summa param names and multiplier values
     multp_names = np.loadtxt(multp_tpl, dtype='str')

@@ -32,20 +32,6 @@ def read_from_control(control_file, setting):
     # Return this value    
     return substring
 
-# Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
-
-    # Open fileManager.txt or route_control and locate the line with setting
-    with open(control_file) as ff:
-        for line in ff:
-            line = line.strip()
-            if line.startswith(setting):
-                break
-    # Extract the setting's value
-    substring = line.split('!',1)[0].strip().split(None,1)[1].strip("'")
-    # Return this value    
-    return substring
-
 # main
 if __name__ == '__main__':
     

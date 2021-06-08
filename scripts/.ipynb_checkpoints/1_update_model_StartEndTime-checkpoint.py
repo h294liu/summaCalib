@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# #### Create a priori trial parameter file (trialParam.priori.nc) ####
-# Given a list of to-be-evaluated parameters, create their corresponding a priori parameter values. 
-# 1. update outputControl.txt by adding parameter names.
-# 2. update fileManager.txt by changing simStartTime and simEndTime.
-# 2. run SUMMA model to get a priori parameter values in summa outp
-# 3. extract a priori parameter values from summa output and generate trialParam.priori.nc.
+# #### Update simulation start and end times in fileManager.txt and mizuroute.control ####
 
 # import module
 import os, sys, argparse, shutil, datetime
@@ -34,20 +29,6 @@ def read_from_control(control_file, setting):
     # Return this value    
     return substring
 
-# Function to extract a given setting from the summa and mizuRoute manager/control files
-def read_from_summa_mizuRoute_control(control_file, setting):
-
-    # Open fileManager.txt or route_control and locate the line with setting
-    with open(control_file) as ff:
-        for line in ff:
-            line = line.strip()
-            if line.startswith(setting):
-                break
-    # Extract the setting's value
-    substring = line.split('!',1)[0].strip().split(None,1)[1].strip("'")
-    # Return this value    
-    return substring
-
 
 # main
 if __name__ == '__main__':
@@ -72,8 +53,10 @@ if __name__ == '__main__':
     model_dst_path = read_from_control(control_file, 'model_dst_path')
     if model_dst_path == 'default':
         model_dst_path = os.path.join(domain_path, 'model')
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
-    route_setting_path = os.path.join(model_dst_path, 'settings/mizuRoute')
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_settings_path = os.path.join(model_dst_path, summa_settings_relpath)
+    route_settings_relpath = read_from_control(control_file, 'route_settings_relpath')
+    route_settings_path = os.path.join(model_dst_path, route_settings_relpath)
 
     # read simulation start and end time from control_file.
     simStartTime = read_from_control(control_file, 'simStartTime')
@@ -84,8 +67,8 @@ if __name__ == '__main__':
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
     summa_filemanager_temp = summa_filemanager.split('.txt')[0]+'_temp.txt'
 
-    summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
-    summa_filemanager_temp = os.path.join(summa_setting_path, summa_filemanager_temp)
+    summa_filemanager = os.path.join(summa_settings_path, summa_filemanager)
+    summa_filemanager_temp = os.path.join(summa_settings_path, summa_filemanager_temp)
 
     # change sim times in fileManager.txt            
     with open(summa_filemanager, 'r') as src:
@@ -102,17 +85,17 @@ if __name__ == '__main__':
     os.remove(summa_filemanager_temp);
 
 
-    # #### 2. Update mizuroute_control by changing simStartTime and simEndTime. 
-    # identify mizuroute_control and a temporary file. 
-    mizuroute_control = read_from_control(control_file, 'mizuroute_control')
-    mizuroute_control_temp = mizuroute_control.split('.txt')[0]+'_temp.txt'
+    # #### 2. Update route_control by changing simStartTime and simEndTime. 
+    # identify route_control and a temporary file. 
+    route_control = read_from_control(control_file, 'route_control')
+    route_control_temp = route_control.split('.txt')[0]+'_temp.txt'
 
-    mizuroute_control = os.path.join(route_setting_path, mizuroute_control)
-    mizuroute_control_temp = os.path.join(route_setting_path, mizuroute_control_temp)
+    route_control = os.path.join(route_settings_path, route_control)
+    route_control_temp = os.path.join(route_settings_path, route_control_temp)
 
-    # change sim times in mizuroute_control           
-    with open(mizuroute_control, 'r') as src:
-        with open(mizuroute_control_temp, 'w') as dst:
+    # change sim times in route_control           
+    with open(route_control, 'r') as src:
+        with open(route_control_temp, 'w') as dst:
             for line in src:
                 if line.startswith('<sim_start>'):
                     simStartTime_old = line.split('!',1)[0].strip().split(None,1)[1]
@@ -121,5 +104,5 @@ if __name__ == '__main__':
                     simEndTime_old = line.split('!',1)[0].strip().split(None,1)[1]
                     line = line.replace(simEndTime_old, simEndTime)
                 dst.write(line)
-    shutil.copy2(mizuroute_control_temp, mizuroute_control);
-    os.remove(mizuroute_control_temp);
+    shutil.copy2(route_control_temp, route_control);
+    os.remove(route_control_temp);
