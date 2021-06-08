@@ -124,17 +124,21 @@ if __name__ == '__main__':
                 param_name = param_names[i]
 
                 # update all params except 'thickness'
-                if param_name in dst.variables.keys() and (param_name != 'thickness'):  
+                if (param_name != 'thickness') and param_name in dst.variables.keys():  
 
                     # update param values
                     if not param_name in direct_param_list:# new_value = multipler * default_value
                         param_ma_priori = src.variables[param_name][:]               # priori param value mask array 
                         param_value     = param_ma_priori.data * multp_values[i]     # update param value mask array
-                        dst.variables[param_name][:] = np.ma.array(param_value, mask=np.ma.getmask(param_ma_priori), fill_value=param_ma_priori.get_fill_value())
+                        dst.variables[param_name][:] = np.ma.array(param_value, \
+                                                                   mask=np.ma.getmask(param_ma_priori), \
+                                                                   fill_value=param_ma_priori.get_fill_value())
                     elif param_name in direct_param_list: # new_value = Ostrich value
                         param_ma_priori = src.variables[param_name][:]                          # priori param value mask array 
                         param_value     = np.ones_like(param_ma_priori.data) * multp_values[i]  # update param value mask array
-                        dst.variables[param_name][:] = np.ma.array(param_value, mask=np.ma.getmask(param_ma_priori), fill_value=param_ma_priori.get_fill_value())                   
+                        dst.variables[param_name][:] = np.ma.array(param_value, \
+                                                                   mask=np.ma.getmask(param_ma_priori), \
+                                                                   fill_value=param_ma_priori.get_fill_value())                   
 
                     # if param is 'theta_sat', update other four soil variables using a priori param value fractions.
                     if param_name == 'theta_sat':
@@ -145,11 +149,18 @@ if __name__ == '__main__':
                             add_param_ma_priori  = src.variables[add_param][:]
                             fraction =  np.divide(add_param_ma_priori.data, param_ma_priori.data) # fraction based on priori variable values
                             add_param_value = param_ma.data * fraction
-                            dst.variables[add_param][:]= np.ma.array(add_param_value, mask=np.ma.getmask(add_param_ma_priori), fill_value=add_param_ma_priori.get_fill_value())
-
-            # update 'thickness' if exists. When param is 'thickness', use it to calculate TopCanopyHeight.
-            param_name == 'thickness'
-            if (param_name in param_names) and (param_name in dst.variables.keys()):
+                            dst.variables[add_param][:]= np.ma.array(add_param_value, \
+                                                                     mask=np.ma.getmask(add_param_ma_priori), \
+                                                                     fill_value=add_param_ma_priori.get_fill_value())
+                
+                # exist code if this parameter does not exist in trialParam.nc.
+                elif not (param_name in dst.variables.keys()):
+                    print('Unable to update parameter %s beucase it does not exist in trialParam.nc'%(param_name))
+                    sys.exit(0)
+                    
+            # After updating all parameters, update 'thickness' if it exists. 
+            # Actually, use 'thickness' to calculate TopCanopyHeight.
+            if 'thickness' in param_names:
                 tied_param_name   = 'heightCanopyBottom'
                 target_param_name = 'heightCanopyTop'
 
@@ -157,5 +168,9 @@ if __name__ == '__main__':
                 TH_param_ma_priori = src.variables[target_param_name][:]         # priori TopCanopyHeight mask array 
                 BH_param_ma_priori = src.variables[tied_param_name][:]           # priori BottomCanopyHeight mask array 
                 BH_param_ma        = dst.variables[tied_param_name][:]           # updated BottomCanopyHeight mask array
-                param_value        = BH_param_ma.data + (TH_param_ma_priori.data-BH_param_ma_priori.data)*multp_values[i]    # updated TopCanopyHeight values
-                dst.variables[target_param_name][:] = np.ma.array(param_value, mask=np.ma.getmask(TH_param_ma_priori), fill_value=TH_param_ma_priori.get_fill_value())
+                param_value        = BH_param_ma.data + \
+                (TH_param_ma_priori.data-BH_param_ma_priori.data)*multp_values[i]    # updated TopCanopyHeight values
+                dst.variables[target_param_name][:] = np.ma.array(param_value, \
+                                                                  mask=np.ma.getmask(TH_param_ma_priori), \
+                                                                  fill_value=TH_param_ma_priori.get_fill_value())
+

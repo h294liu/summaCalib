@@ -109,8 +109,8 @@ date | awk '{printf("%s: running summa\n",$0)}' >> $calib_path/timetrack.log
 
 for gru in $(seq 1 $nGRU); do
   echo "running $gru"
-#   ${summaExe} -g $gru $nCoresPerJob -r never -m $summa_filemanager &  # parallel run
-  ${summaExe} -g $gru $nCoresPerJob -r never -m $summa_filemanager   # seq. run by gru
+  ${summaExe} -g $gru $nCoresPerJob -r never -m $summa_filemanager &  # parallel run
+#   ${summaExe} -g $gru $nCoresPerJob -r never -m $summa_filemanager   # seq. run by gru
 done
 wait
 
