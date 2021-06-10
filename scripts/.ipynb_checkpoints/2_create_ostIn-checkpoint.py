@@ -71,13 +71,16 @@ if __name__ == '__main__':
     # write multiplier template file.
     multp_tpl = read_from_control(control_file, 'multp_tpl')
     multp_tpl = os.path.join(calib_tpl_path, multp_tpl)
+
+    if os.path.exists(multp_tpl):
+        os.remove(multp_tpl)
     np.savetxt(multp_tpl, multp_bounds_arr[:,0], fmt='%s')
 
     # write multiplier txt file.
     multp_value = read_from_control(control_file, 'multp_value')
     multp_value = os.path.join(calib_path, multp_value)
     np.savetxt(multp_value, multp_bounds_arr[:,1], fmt='%s')
-
+    
 
     # #### 2. Write ostIn.txt based on ostIn.tpl
     

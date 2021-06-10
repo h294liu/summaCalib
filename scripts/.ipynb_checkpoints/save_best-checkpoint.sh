@@ -52,12 +52,23 @@ route_settings_path=$model_path/$route_settings_relpath
 # Get summa and mizuRoute controls/fileManager files.
 summa_filemanager="$(read_from_control $control_file "summa_filemanager")"
 summa_filemanager=$summa_settings_path/$summa_filemanager
-route_control="$(read_from_control $control_file "mizuroute_control")"
+route_control="$(read_from_control $control_file "route_control")"
 route_control=$route_settings_path/$route_control
+echo $summa_filemanager
+echo $route_control
 
-# Extract summa output path and prefix from fileManager.txt (use to remove summa outputs).
+# Extract summa output path and prefix from fileManager.txt.
 summa_outputPath="$(read_from_summa_route_control $summa_filemanager "outputPath")"
 summa_outFilePrefix="$(read_from_summa_route_control $summa_filemanager "outFilePrefix")"
+
+# Extract summa parameter file from fileManager.txt.
+trialParamFile="$(read_from_summa_route_control $summa_filemanager "trialParamFile")"
+trialParamFile_priori=${trialParamFile%\.nc}.priori.nc
+echo $trialParamFile
+echo $trialParamFile_priori
+
+trialParamFile=$summa_settings_path/$trialParamFile
+trialParamFile_priori=$summa_settings_path/$trialParamFile_priori
 
 # Extract mizuRoute output path and prefix from route_control (use for removing outputs).
 route_outputPath="$(read_from_summa_route_control $route_control "<output_dir>")"
@@ -79,10 +90,21 @@ outDir="${calib_path}/output_archive/$experiment_id/"
 mkdir -p $outDir
 
 echo "saving input files for the best solution found in $outDir ..."
+
+# save multipliers.txt.
 cp $calib_path/$multp_value $outDir/
+
+# save hydrologic model control files, parameter file and outputs.
 cp $summa_filemanager $outDir/
+cp $route_control $outDir/ 
+
+cp $trialParamFile $outDir/
+cp $trialParamFile_priori $outDir/
+
 cp $summa_outputPath/${summa_outFilePrefix}_timestep.nc $outDir/
 cp $route_outputPath/${summa_outFilePrefix}*.nc $outDir/
+
+# save model performance evaluation result and Ostrich output files.
 cp $stat_output $outDir/
 cp $calib_path/Ost*.txt $outDir/
 cp $calib_path/timetrack.log $outDir/

@@ -73,7 +73,7 @@ if __name__ == '__main__':
     if model_dst_path == 'default':
         model_dst_path = os.path.join(domain_path, 'model')
     summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
-    summa_setting_path = os.path.join(model_dst_path, summa_settings_relpath)
+    summa_settings_path = os.path.join(model_dst_path, summa_settings_relpath)
 
 
     # #### 1. Update summa outputControl.txt by adding parameter names.
@@ -89,12 +89,12 @@ if __name__ == '__main__':
                 output_params.append(soil_param)            
 
     # identify outputControl.txt and a temporary file.
-    summa_filemanager = os.path.join(summa_setting_path, read_from_control(control_file, 'summa_filemanager'))
+    summa_filemanager = os.path.join(summa_settings_path, read_from_control(control_file, 'summa_filemanager'))
     outputControlFile = read_from_summa_route_control(summa_filemanager, 'outputControlFile')
 
     outputControlFile_temp = outputControlFile.split('.txt')[0]+'_temp.txt'
-    outputControlFile = os.path.join(summa_setting_path, outputControlFile)
-    outputControlFile_temp = os.path.join(summa_setting_path, outputControlFile_temp)
+    outputControlFile = os.path.join(summa_settings_path, outputControlFile)
+    outputControlFile_temp = os.path.join(summa_settings_path, outputControlFile_temp)
 
     # add output_params to outputControl.txt            
     with open(outputControlFile, 'r') as src:
@@ -118,8 +118,8 @@ if __name__ == '__main__':
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
     summa_filemanager_temp = summa_filemanager.split('.txt')[0]+'_temp.txt'
 
-    summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
-    summa_filemanager_temp = os.path.join(summa_setting_path, summa_filemanager_temp)
+    summa_filemanager = os.path.join(summa_settings_path, summa_filemanager)
+    summa_filemanager_temp = os.path.join(summa_settings_path, summa_filemanager_temp)
 
     # change sim times in fileManager.txt            
     with open(summa_filemanager, 'r') as src:
@@ -159,11 +159,11 @@ if __name__ == '__main__':
     trialParamFile = read_from_summa_route_control(summa_filemanager, 'trialParamFile')
     trialParamFile_priori = trialParamFile.split('.nc')[0] + '.priori.nc' # a priori param file
 
-    trialParamFile = os.path.join(summa_setting_path, trialParamFile)
-    trialParamFile_priori = os.path.join(summa_setting_path, trialParamFile_priori)
+    trialParamFile = os.path.join(summa_settings_path, trialParamFile)
+    trialParamFile_priori = os.path.join(summa_settings_path, trialParamFile_priori)
 
     attributeFile = read_from_summa_route_control(summa_filemanager,'attributeFile')
-    attributeFile = os.path.join(summa_setting_path, attributeFile)
+    attributeFile = os.path.join(summa_settings_path, attributeFile)
 
     # open summa output file for reading
     with nc.Dataset(summa_ofile, 'r') as ff:
