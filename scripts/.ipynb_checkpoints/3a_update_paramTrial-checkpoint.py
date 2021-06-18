@@ -154,7 +154,7 @@ if __name__ == '__main__':
                                                                      fill_value=add_param_ma_priori.get_fill_value())
                 
                 # exist code if this parameter does not exist in trialParam.nc.
-                elif not (param_name in dst.variables.keys()):
+                elif (param_name != 'thickness') and not (param_name in dst.variables.keys()):
                     print('Unable to update parameter %s beucase it does not exist in trialParam.nc'%(param_name))
                     sys.exit(0)
                     

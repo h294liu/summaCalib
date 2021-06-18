@@ -22,8 +22,9 @@ route_control          | mizuroute.control     # Name of the mizuRoute configura
 route_exe_path         | /home/h294liu/github/mizuroute/route/bin/mizuroute.exe     # muziroute executable path.
 
 simStartTime           | 2008-01-01 00:00      # simualtion start time for parameter estimation, in format yyyy-mm-dd hh:mm. 
-simEndTime             | 2008-01-05 23:00      # simualtion end time for parameter estimation, in format yyyy-mm-dd hh:mm.  
+simEndTime             | 2009-12-31 23:00      # simualtion end time for parameter estimation, in format yyyy-mm-dd hh:mm.  
 nGRU                   | 51                    # number of GRUs for whole basin, can query with ncinfo -d gru <attributes_file>.
+domain_area            | 2216040386.101139     # domain area in sqaure meter, used to calculate the range of routingGammaScale.
 
 ## ---- PART 3. Evaluated parameter settings ---- 
 object_parameters      | k_macropore, k_soil, theta_sat, aquiferBaseflowExp, aquiferBaseflowRate, qSurfScale, summerLAI, frozenPrecipMultip, heightCanopyBottom, heightCanopyTop, routingGammaScale, routingGammaShape, Fcapil # parameters to be optimized or evaluated.
@@ -36,8 +37,8 @@ multp_tpl              | multipliers.tpl              # Name of file with a list
 multp_value            | multipliers.txt              # Name of file with a list of multiplier values. Workflow output in [calib_path].
 
 ostrich_exe_path       | /home/h294liu/github/Ostrich_v17.12.19/Source/OstrichGCC # Path of Ostrich executable.
-experiment_id          | 1	                          # Optimization experiment ID, used to archive optimization results.
-max_iterations         | 10	                          # Maximum Number of iterations for optimization. Optional, depending on the optimization method.
+experiment_id          | 3	                          # Optimization experiment ID, used to archive optimization results.
+max_iterations         | 100                          # Maximum Number of iterations for optimization. Optional, depending on the optimization method.
 
 ## ---- PART 5. Calculate statistics settings ----
 q_seg_index            | 51                           # segment index in routing file matching obs location (start from 1).
@@ -45,4 +46,4 @@ obs_file               | /home/h294liu/projects/rpp-kshook/h294liu/proj/5_summaC
 obs_unit               | cfs                          # observation streamflow data unit (cfs or cms).
 stat_output            | trial_stats.txt              # Name of file with statistical metric results.
 statStartDate          | 2008-01-01                   # Start date of statistics calculation period, in format yyyy-mm-dd. 
-statEndDate            | 2008-01-05                   # End date of statistics calculation period, in format yyyy-mm-dd.  
+statEndDate            | 2009-12-31                   # End date of statistics calculation period, in format yyyy-mm-dd.  

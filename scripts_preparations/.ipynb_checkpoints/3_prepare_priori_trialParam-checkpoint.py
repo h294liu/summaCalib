@@ -188,7 +188,25 @@ if __name__ == '__main__':
 
                     # create parameter varibles 
                     for param_name in output_params:
-                        param_value = ff[param_name][:].flat[0] # the first element of the array regardless dimensions                    
+                        # get param value
+                        if param_name != 'routingGammaScale':
+                            param_value = ff[param_name][:].flat[0] # the first element of the array regardless dimensions   
+                        
+                        elif param_name == 'routingGammaScale': # calculate a-priori value for GammaScale
+                            # read a-priori value of Gamma shape
+                            shape_priori = ff['routingGammaShape'][:].flat[0]
+                            
+                            # calculate mean GRU area
+                            domain_area = float(read_from_control(control_file, 'domain_area'))
+                            nGRU = float(read_from_control(control_file, 'nGRU'))
+                            GRU_area = domain_area/nGRU  # mean GRU area in square meter
+                            GRU_channel_length = np.sqrt(GRU_area)  # mean GRU chennel length in meter
+                            
+                            # calculate a-priori Gamma scale = (GRU_channel_length/velocity)/shape
+                            v_priori = 1.0 # unit: m/s
+                            param_value = (GRU_channel_length/v_priori)/shape_priori    
+                        
+                        # get param dimension
                         summa_ofile_dims = ff[param_name].dimensions
                         if 'hru' in summa_ofile_dims:
                             param_dim = 'hru'
@@ -197,7 +215,8 @@ if __name__ == '__main__':
                         else:
                             print('Variable %s is not in dimension gru or hru in summa outp'%(param_name))
                             sys.exit()
-
+                        
+                        # create this param variable and fill value
                         dst.createVariable(param_name, 'float', param_dim, fill_value=np.nan) 
                         dst[param_name][:] = param_value
 
@@ -219,10 +238,29 @@ if __name__ == '__main__':
                             dst[name].setncatts(src[name].__dict__)
                             dst[name][:]=src[name][:] 
 
-                    # create parameter varibles 
+                    # create and fill parameter varibles 
                     dst_vars=(dst.variables.keys()) # get all variable names of dst 
                     for param_name in output_params:
-                        param_value = ff[param_name][:].flat[0] # the first element of the array regardless dimensions                    
+                        
+                        # get param value
+                        if param_name != 'routingGammaScale':
+                            param_value = ff[param_name][:].flat[0] # the first element of the array regardless dimensions   
+                        
+                        elif param_name == 'routingGammaScale': # calculate a-priori value for GammaScale
+                            # read a-priori value of Gamma shape
+                            shape_priori = ff['routingGammaShape'][:].flat[0]
+                            
+                            # calculate mean GRU area
+                            domain_area = float(read_from_control(control_file, 'domain_area'))
+                            nGRU = float(read_from_control(control_file, 'nGRU'))
+                            GRU_area = domain_area/nGRU  # mean GRU area in square meter
+                            GRU_channel_length = np.sqrt(GRU_area)  # mean GRU chennel length in meter
+                            
+                            # calculate a-priori Gamma scale = (GRU_channel_length/velocity)/shape
+                            v_priori = 1.0 # unit: m/s
+                            param_value = (GRU_channel_length/v_priori)/shape_priori                           
+                        
+                        # get param dimension
                         summa_ofile_dims = ff[param_name].dimensions
                         if 'hru' in summa_ofile_dims:
                             param_dim = 'hru'
@@ -231,10 +269,13 @@ if __name__ == '__main__':
                         else:
                             print('Variable %s is not in dimension gru or hru in summa outp'%(param_name))
                             sys.exit()
-
+                        
+                        # create this param variable if it does not exist
                         if not param_name in dst_vars:                    
                             dst.createVariable(param_name, 'float', param_dim, fill_value=np.nan) 
-                            dst[param_name][:] = param_value
-
-    # copy trialParamFile to get trialParamFile_priori
+                        
+                        # assign value to the param
+                        dst[param_name][:] = param_value
+    
+    # #### 6. copy trialParamFile to get trialParamFile_priori
     shutil.copy2(trialParamFile, trialParamFile_priori);

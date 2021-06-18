@@ -147,31 +147,11 @@ if __name__ == '__main__':
             param_max = local_param_max[index]
 
         elif param_name in basin_param_names:
-            if param_name != 'routingGammaScale': 
-                index   = basin_param_names.index(param_name)
-                param_default = basin_param_default[index]
-                param_min = basin_param_min[index]
-                param_max = basin_param_max[index]
-                
-            elif param_name == 'routingGammaScale': 
-                # get routingGammaShape values
-                index = basin_param_names.index('routingGammaShape')
-                shape_default = basin_param_default[index]
+            index   = basin_param_names.index(param_name)
+            param_default = basin_param_default[index]
+            param_min = basin_param_min[index]
+            param_max = basin_param_max[index]
 
-                # calculate gru streamline length (m)
-                domain_area = float(read_from_control(control_file, 'domain_area'))
-                nGRU = float(read_from_control(control_file, 'nGRU'))
-                GRU_area = domain_area/nGRU  # mean GRU area in square meter
-                GRU_channel_length = np.sqrt(GRU_area)  # mean GRU chennel length in meter
-
-                # assume lower and upper runoff velocity
-                v_priori, v_lower, v_upper = 1, 0.1, 10 # unit: m/s
-
-                # calculate routingGammaScale default, lower and upper value.
-                param_default  = (GRU_channel_length/v_priori)/shape_default
-                param_min = (GRU_channel_length/v_upper)/shape_default
-                param_max = (GRU_channel_length/v_lower)/shape_default
-                
         elif param_name == 'thickness': 
             # read bottom and top heights
             index = local_param_names.index('heightCanopyBottom')
