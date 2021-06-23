@@ -4,6 +4,9 @@
 # creates a time tracking log to monitor pace of calibration
 # USES on cluster: module load python; module load nco 
 
+# -----------------------------------------------------------------------------------------
+# ----------------------------- User specified input --------------------------------------
+# -----------------------------------------------------------------------------------------
 control_file="control_active.txt"
 
 # -----------------------------------------------------------------------------------------
@@ -32,7 +35,7 @@ read_from_summa_route_control () {
 }
 
 # -----------------------------------------------------------------------------------------
-# ------------------------- Settings based on control_file --------------------------------
+# -------------------------- Read settings from control_file ------------------------------
 # -----------------------------------------------------------------------------------------
 # Get common paths.
 root_path="$(read_from_control $control_file "root_path")"
@@ -87,7 +90,7 @@ echo " "
 date | awk '{printf("%s: ---- executing new trial ----\n",$0)}' >> $calib_path/timetrack.log
 
 # ------------------------------------------------------------------------------
-# --- 1.  update params (takes basin id as arg)                              ---
+# --- 1.  update params                                                      ---
 # ------------------------------------------------------------------------------
 
 echo "--- updating params ---"
@@ -100,11 +103,11 @@ echo " "
 # ------------------------------------------------------------------------------
 echo Running and routing 
 
-# Remove previous outputs before we run
+# (1) Create summa output path if it does not exist; and remove previous outputs.
 if [ ! -d $summa_outputPath ]; then mkdir -p $summa_outputPath; fi
 rm -f $summa_outputPath/${summa_outFilePrefix}*
 
-# --- Run Summa (split domain) and concatenate/adjust output for routing
+# (2) Run Summa (split domain) and concatenate/adjust output for routing.
 date | awk '{printf("%s: running summa\n",$0)}' >> $calib_path/timetrack.log
 
 for gru in $(seq 1 $nGRU); do
@@ -114,24 +117,28 @@ for gru in $(seq 1 $nGRU); do
 done
 wait
 
-# merge output runoff into one file for routing
+# (3) Merge output runoff into one file for routing.
 echo concatenating output files in $summa_outputPath
 python $calib_path/scripts/3b_concat_split_summa.py $control_file
 
-# shift output time back 1 day for routing model - only if computing daily outputs!
-# Be careful. Hard coded summa _timestep.nc name.
-ncap2 -O -s 'time[time]=time-86400' $summa_outputPath/$summa_outFilePrefix\_timestep.nc $summa_outputPath/$summa_outFilePrefix\_timestep.nc
+# (4) Shift output time back 1 day for routing model - only if computing daily outputs!
+# Be careful. Hard coded file name "xxx_day.nc". Valid for daily simulation.
+ncap2 -O -s 'time[time]=time-86400' $summa_outputPath/$summa_outFilePrefix\_day.nc $summa_outputPath/$summa_outFilePrefix\_day.nc
 
 # ------------------------------------------------------------------------------
-# --- 3.  route summa output with mizuRoute                                  ---
+# --- 3.  run mizuRoute                                                      ---
 # ------------------------------------------------------------------------------
 date | awk '{printf("%s: routing summa\n",$0)}' >> $calib_path/timetrack.log
 
-# # route, after removing existing output
-# create summa output path if it does not exist.
+# (1) Create mizuRoute output path if it does not exist; and remove existing outputs.
 if [ ! -d $route_outputPath ]; then mkdir -p $route_outputPath; fi
 rm -f $route_outputPath/${route_outFilePrefix}*
+
+# (2) Run mizuRoute.
 ${routeExe} $route_control
+
+# (3) Merge output runoff into one file for statistics calculation.
+ncrcat -O -v time,reachID,IRFroutedRunoff -h $route_outputPath/${route_outFilePrefix}* $route_outputPath/${route_outFilePrefix}.nc
 
 # ------------------------------------------------------------------------------
 # --- 4.  calculate statistics for Ostrich                                   ---
@@ -139,8 +146,10 @@ ${routeExe} $route_control
 echo calculating statistics
 date | awk '{printf("%s: calculating statistics\n",$0)}' >> $calib_path/timetrack.log
 
-# Remove the stats output file to make sure it is created properly with every run
+# (1) Remove the stats output file to make sure it is created properly with every run.
 rm -f $stat_output
+
+# (2) Calculate statistics.
 python $calib_path/scripts/3c_calc_sim_stats.py $control_file
 
 date | awk '{printf("%s: done with trial\n",$0)}' >> $calib_path/timetrack.log

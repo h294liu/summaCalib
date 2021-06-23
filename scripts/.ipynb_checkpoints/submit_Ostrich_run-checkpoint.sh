@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=rpp-kshook
-#SBATCH --time=01:00:00
+#SBATCH --time=52:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=36
 #SBATCH --mem-per-cpu=1024M
@@ -17,7 +17,7 @@ script_folder=scripts
 control_active=control_active.txt
 
 # Update summa and mizuRoute sim start/end time based on control_active.txt.
-python ${script_folder}/1_update_model_StartEndTime.py $control_active
+python ${script_folder}/1_update_model_config_files.py $control_active
 
 # Create ostIn.txt by adding multiplier and other information.
 python ${script_folder}/2_create_ostIn.py $control_active

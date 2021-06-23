@@ -162,10 +162,12 @@ if __name__ == '__main__':
                 domain_area = float(read_from_control(control_file, 'domain_area'))
                 nGRU = float(read_from_control(control_file, 'nGRU'))
                 GRU_area = domain_area/nGRU  # mean GRU area in square meter
-                GRU_channel_length = np.sqrt(GRU_area)  # mean GRU chennel length in meter
+                
+                # assume GRU is a round circle, take its radius as the mean chennel length. 
+                GRU_channel_length = np.sqrt(GRU_area/np.pi)  # mean GRU chennel length in meter
 
                 # assume lower and upper runoff velocity
-                v_priori, v_lower, v_upper = 1, 0.1, 10 # unit: m/s
+                v_priori, v_lower, v_upper = 1, 0.01, 10 # unit: m/s
 
                 # calculate routingGammaScale default, lower and upper value.
                 param_default  = (GRU_channel_length/v_priori)/shape_default

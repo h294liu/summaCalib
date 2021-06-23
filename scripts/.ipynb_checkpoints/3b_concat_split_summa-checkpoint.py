@@ -80,9 +80,9 @@ if __name__ == '__main__':
 
     # # #### 1. Read input and output arguments
     # get list of split summa output files (hard coded)
-    outfilelist = glob((outputPath + outFilePrefix + '_G*_timestep.nc'))   # assumes daily outputs.
+    outfilelist = glob((outputPath + outFilePrefix + '_G*_day.nc'))   # assumes daily outputs.
     outfilelist.sort()   # not needed, perhaps
-    merged_output_file = os.path.join(outputPath,outFilePrefix+'_timestep.nc') # Be careful. Hard coded.
+    merged_output_file = os.path.join(outputPath,outFilePrefix+'_day.nc') # Be careful. Hard coded.
 
     # # #### 2. Count the number of gru and hru
     gru_num = 0

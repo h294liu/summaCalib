@@ -9,8 +9,8 @@ import os, sys
 import numpy as np
 import datetime
 import pandas as pd
-import netCDF4 as nc
-import argparse
+import xarray as xr
+import argparse, glob
 
 def process_command_line():
     '''Parse the commandline'''
@@ -121,19 +121,12 @@ if __name__ == '__main__':
     # #### 1. Read input and output arguments 
     # (input) mizuRoute output file
     output_dir = read_from_summa_route_control(route_control, '<output_dir>')
-    case_name = read_from_summa_route_control(route_control, '<case_name>')
-    sim_start = read_from_summa_route_control(route_control, '<sim_start>')
+    route_outFilePrefix=read_from_summa_route_control(route_control, "<case_name>")
     
-    # (input) define mizuRoute output file name based on mizuRoute source code "write_simoutput.f90".
-    sim_start_datetime = datetime.datetime.strptime(sim_start,'%Y-%m-%d %H:%M')
-    sim_year, sim_month, sim_day, sim_hour, sim_minute, sim_second  = \
-    sim_start_datetime.year, sim_start_datetime.month, sim_start_datetime.day, \
-    sim_start_datetime.hour, sim_start_datetime.minute, sim_start_datetime.second
+    # (input) define mizuRoute output file name based on mizuRoute source code "write_simoutput.f90".    
+    route_outFileList = glob.glob(output_dir+'/'+route_outFilePrefix+'.*.nc')
+    route_outFileList.sort()
     
-    sec_in_day = sim_hour*60*60 + sim_minute*60 + sim_second
-    routeOutputFile = ('%s.h.%04d-%02d-%02d-%05d.nc')%(case_name, sim_year, sim_month, sim_day, sec_in_day)
-    routeOutputFile = os.path.join(output_dir, routeOutputFile) 
-
     # (input) segment id, observations, statistics relevant configs.
     q_seg_index = int(read_from_control(control_file, 'q_seg_index')) # start from one.
     
@@ -144,8 +137,6 @@ if __name__ == '__main__':
     statEndDate = read_from_control(control_file, 'statEndDate')
 
     # (input) others
-    q_vname = 'IRFroutedRunoff'
-    t_vname = 'time'
     time_format='%Y-%m-%d'
     statStartDate = datetime.datetime.strptime(statStartDate,time_format)
     statEndDate = datetime.datetime.strptime(statEndDate,time_format)    
@@ -156,13 +147,14 @@ if __name__ == '__main__':
 
     # #### 2. Calculate 
     # --- read simulated flow (cms) --- 
-    f = nc.Dataset(routeOutputFile)
-    sim_irf = f.variables[q_vname][:,q_seg_index-1]
-    time = f.variables[t_vname]
-    sim_time = nc.num2date(time[:], time.units)
-    f.close() 
-    df_sim = pd.DataFrame({'sim':sim_irf},index = sim_time)
-    
+    simVarName = 'IRFroutedRunoff'
+    simFile = os.path.join(output_dir, route_outFilePrefix+'.nc') # Hard coded file name. Be careful.
+    f    = xr.open_dataset(simFile)
+    time = f['time'].values
+    sim  = f[simVarName][:,(q_seg_index-1)].values #(time, segments)
+    df_sim = pd.DataFrame({'sim':sim},index = time)
+    df_sim.index = pd.to_datetime(df_sim.index)
+
     # --- read observed flow (cfs or cms) --- 
     df_obs = pd.read_csv(obs_file, index_col='Date', na_values=["-99.0","-999.0","-9999.0"],
                          parse_dates=True, infer_datetime_format=True)  
