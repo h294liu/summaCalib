@@ -1,5 +1,8 @@
 #!/bin/bash
-# save use-specifed files every time a bew best paraemter set is discovered.
+# save use-specified files associated with each model run.
+# preserved files will be stored in directories named "runNNN", where NNN is a counter.
+# Ostrich will pass the following arguments into this script: rank(1), trial(2), counter(3),
+# and objective function category(4). Here counter is used.
 
 control_file="control_active.txt"
 
@@ -83,30 +86,23 @@ multp_value="$(read_from_control $control_file "multp_value")"
 # -----------------------------------------------------------------------------------------
 
 outDir="${calib_path}/output_archive/experiment$experiment_id"
-mkdir -p $outDir
+runDir=$outDir/run$3
+mkdir -p $runDir
 
-echo "saving input and output files for the best solution."
-
-# save control_file
-cp $calib_path/$control_file $outDir/
+echo "$(date +"%Y-%m-%d %T"): saving model output files for run $3."
+date | awk '{printf("%s: saving model output\n",$0)}' >> $calib_path/timetrack.log
 
 # save multipliers.txt.
-cp $calib_path/$multp_value $outDir/
+cp $calib_path/$multp_value $runDir/
 
-# save hydrologic model control files, parameter file and outputs.
-cp $summa_filemanager $outDir/
-cp $route_control $outDir/ 
+# save hydrologic model parameter file and outputs.
+cp $trialParamFile $runDir/
+cp $summa_outputPath/${summa_outFilePrefix}_day.nc $runDir/
+cp $route_outputPath/${summa_outFilePrefix}.mizuRoute.nc $runDir/
 
-cp $trialParamFile $outDir/
-cp $trialParamFile_priori $outDir/
-
-cp $summa_outputPath/${summa_outFilePrefix}_day.nc $outDir/
-cp $route_outputPath/${summa_outFilePrefix}.mizuRoute.nc $outDir/
-
-# save model performance evaluation result and Ostrich output files.
-cp $stat_output $outDir/
-cp $calib_path/Ost*.txt $outDir/
-cp $calib_path/timetrack.log $outDir/
+# save model performance evaluation result and Ostrich exeOut files.
+cp $stat_output $runDir/
+cp $calib_path/OstExeOut.txt $runDir/
 
 exit 0
 

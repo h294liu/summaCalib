@@ -11,6 +11,9 @@ def process_command_line():
     '''Parse the commandline'''
     parser = argparse.ArgumentParser(description='Script to icalculate model evaluation statistics.')
     parser.add_argument('controlFile', help='path of the overall control file.')
+    parser.add_argument('suffix', nargs='?', default='day', type=str,
+                       help='Optional argument. Suffix of summa output files to be concatenate. \
+                       Two options: day, timestep', )
     args = parser.parse_args()
     return(args)
 
@@ -49,12 +52,13 @@ if __name__ == '__main__':
     # ---------------------------- Preparation -------------------------------
     # --- process command line --- 
     # check args
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Usage: %s <control_file>" % sys.argv[0])
         sys.exit(0)
     # otherwise continue
     args = process_command_line()    
     control_file = args.controlFile
+    suffix = args.suffix
     
     # read paths from control_file.
     root_path = read_from_control(control_file, 'root_path')
@@ -80,9 +84,9 @@ if __name__ == '__main__':
 
     # # #### 1. Read input and output arguments
     # get list of split summa output files (hard coded)
-    outfilelist = glob((outputPath + outFilePrefix + '_G*_day.nc'))   # assumes daily outputs.
+    outfilelist = glob((outputPath + outFilePrefix + '_G*_' + suffix +'.nc'))   
     outfilelist.sort()   # not needed, perhaps
-    merged_output_file = os.path.join(outputPath,outFilePrefix+'_day.nc') # Be careful. Hard coded.
+    merged_output_file = os.path.join(outputPath,outFilePrefix+'_' + suffix + '.nc') # Be careful. Hard coded.
 
     # # #### 2. Count the number of gru and hru
     gru_num = 0
