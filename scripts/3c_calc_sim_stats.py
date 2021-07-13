@@ -123,10 +123,6 @@ if __name__ == '__main__':
     output_dir = read_from_summa_route_control(route_control, '<output_dir>')
     route_outFilePrefix=read_from_summa_route_control(route_control, "<case_name>")
     
-    # (input) define mizuRoute output file name based on mizuRoute source code "write_simoutput.f90".    
-    route_outFileList = glob.glob(output_dir+'/'+route_outFilePrefix+'.*.nc')
-    route_outFileList.sort()
-    
     # (input) segment id, observations, statistics relevant configs.
     q_seg_index = int(read_from_control(control_file, 'q_seg_index')) # start from one.
     
@@ -148,7 +144,7 @@ if __name__ == '__main__':
     # #### 2. Calculate 
     # --- read simulated flow (cms) --- 
     simVarName = 'IRFroutedRunoff'
-    simFile = os.path.join(output_dir, route_outFilePrefix+'.nc') # Hard coded file name. Be careful.
+    simFile = os.path.join(output_dir, route_outFilePrefix+'.mizuRoute.nc') # Hard coded file name. Be careful.
     f    = xr.open_dataset(simFile)
     time = f['time'].values
     sim  = f[simVarName][:,(q_seg_index-1)].values #(time, segments)

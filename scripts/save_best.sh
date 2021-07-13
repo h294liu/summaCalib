@@ -101,8 +101,8 @@ cp $route_control $outDir/
 cp $trialParamFile $outDir/
 cp $trialParamFile_priori $outDir/
 
-cp $summa_outputPath/${summa_outFilePrefix}_timestep.nc $outDir/
-cp $route_outputPath/${summa_outFilePrefix}*.nc $outDir/
+cp $summa_outputPath/${summa_outFilePrefix}_day.nc $outDir/
+cp $route_outputPath/${summa_outFilePrefix}.mizuRoute.nc $outDir/
 
 # save model performance evaluation result and Ostrich output files.
 cp $stat_output $outDir/

@@ -122,6 +122,7 @@ echo concatenating output files in $summa_outputPath
 python $calib_path/scripts/3b_concat_split_summa.py $control_file
 
 # (4) Shift output time back 1 day for routing model - only if computing daily outputs!
+# Summa use end of time step for time values, but mizuRoute use beginning of time step.
 # Be careful. Hard coded file name "xxx_day.nc". Valid for daily simulation.
 ncap2 -O -s 'time[time]=time-86400' $summa_outputPath/$summa_outFilePrefix\_day.nc $summa_outputPath/$summa_outFilePrefix\_day.nc
 
@@ -138,7 +139,7 @@ rm -f $route_outputPath/${route_outFilePrefix}*
 ${routeExe} $route_control
 
 # (3) Merge output runoff into one file for statistics calculation.
-ncrcat -O -v time,reachID,IRFroutedRunoff -h $route_outputPath/${route_outFilePrefix}* $route_outputPath/${route_outFilePrefix}.nc
+ncrcat -O -v time,reachID,IRFroutedRunoff -h $route_outputPath/${route_outFilePrefix}* $route_outputPath/${route_outFilePrefix}.mizuRoute.nc
 
 # ------------------------------------------------------------------------------
 # --- 4.  calculate statistics for Ostrich                                   ---
