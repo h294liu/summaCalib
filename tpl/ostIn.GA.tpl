@@ -9,7 +9,6 @@ OstrichWarmStart no
 
 PreserveModelOutput ./save_model_output.sh
 PreserveBestModel ./save_best.sh
-PreserveModelOutput no
 OnObsError	-999
 
 BeginFilePairs    
@@ -47,7 +46,7 @@ ParallelMethod synchronous
 PopulationSize 50 
 MutationRate 0.05 
 Survivors 1 
-NumGenerations 20 
+NumGenerations 130 
 InitPopulationMethod LHS 
 ConvergenceVal 1.00E-4 
 EndGeneticAlg

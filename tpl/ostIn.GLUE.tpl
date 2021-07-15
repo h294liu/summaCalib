@@ -7,8 +7,8 @@ ObjectiveFunction gcop
 
 OstrichWarmStart no
 
+PreserveModelOutput ./save_model_output.sh
 PreserveBestModel ./save_best.sh
-PreserveModelOutput no
 OnObsError	-999
 
 BeginFilePairs    
@@ -44,8 +44,8 @@ RandomSeed xxxxxxxxx
 BeginGLUE
 SamplesPerIter    10
 NumBehavioral     10
-MaxSamples        10000
-Threshold         -0.85
+MaxSamples        100
+Threshold         -0.95
 EndGLUE
 
 #BeginDDSAlg

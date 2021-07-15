@@ -7,8 +7,8 @@ ObjectiveFunction gcop
 
 OstrichWarmStart no
 
+PreserveModelOutput ./save_model_output.sh
 PreserveBestModel ./save_best.sh
-PreserveModelOutput no
 OnObsError	-999
 
 BeginFilePairs    

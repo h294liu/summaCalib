@@ -175,7 +175,6 @@ if __name__ == '__main__':
     for i in range(len(object_multps)):
         multp_name = object_multps[i]
         param_name = multp_name.replace('_multp','')
-        print(param_name)
 
         if param_name in local_param_names:
             if param_name != 'theta_sat': 

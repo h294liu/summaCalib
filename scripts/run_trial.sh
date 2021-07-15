@@ -28,7 +28,7 @@ read_from_summa_route_control () {
     
     line=$(grep -m 1 "^${setting}" $input_file) 
     info=$(echo ${line%%!*}) # remove the part starting at '!'
-    info=$(echo ${info##* }) # get string after space
+    info="$( cut -d ' ' -f 2- <<< "$info" )" # get string after the first space
     info="${info%\'}" # remove the suffix '. Do nothing if no '.
     info="${info#\'}" # remove the prefix '. Do nothing if no '.
     echo $info
@@ -119,7 +119,7 @@ wait
 
 # (3) Merge daily output runoff into one file for routing.
 echo concatenating output files in $summa_outputPath
-python $calib_path/scripts/3b_concat_split_summa.py $control_file
+python $calib_path/scripts/3b_concat_split_summa.py $control_file outputPath day
 
 # (4) Shift output time back 1 day for routing model - only if computing daily outputs!
 # Summa use end of time step for time values, but mizuRoute use beginning of time step.

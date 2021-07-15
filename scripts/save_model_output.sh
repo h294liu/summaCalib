@@ -25,7 +25,7 @@ read_from_summa_route_control () {
     
     line=$(grep -m 1 "^${setting}" $input_file) 
     info=$(echo ${line%%!*}) # remove the part starting at '!'
-    info=$(echo ${info##* }) # get string after space
+    info="$( cut -d ' ' -f 2- <<< "$info" )" # get string after the first space
     info="${info%\'}" # remove the suffix '. Do nothing if no '.
     info="${info#\'}" # remove the prefix '. Do nothing if no '.
     echo $info

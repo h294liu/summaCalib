@@ -194,13 +194,17 @@ if __name__ == '__main__':
 
                         # get param value from summa output
                         if param_name != 'routingGammaScale':
+                            
+                            # k_macropore, k_soil, theta_sat with dim (depth, hru).
                             if summa_ofile_dims == ('depth','hru'):
-                                # k_macropore, k_soil, theta_sat (depth, hru)
-                                param_value = ff[param_name][0,:]
-                            elif summa_ofile_dims == ('hru',) or  summa_ofile_dims == ('gru',):
-                                param_value = ff[param_name][:] # other params, (hru) or (gru).
+                                param_value = ff[param_name][0,:] # use the first depth value.
+                            
+                            # other params with dim (hru) or (gru).
+                            elif summa_ofile_dims == ('hru',) or summa_ofile_dims == ('gru',):
+                                param_value = ff[param_name][:] 
+                            
                             else:
-                                print('Parameter %s has dimensions more than gru, hru, depth:'%(param_name), summa_ofile_dims)
+                                print('Parameter %s has dimensions more than gru, hru, depth:\n Check before moving forward.'%(param_name), summa_ofile_dims)
                                 sys.exit()
                                 
                         elif param_name == 'routingGammaScale': # calculate a-priori value for GammaScale (gru)
@@ -225,7 +229,7 @@ if __name__ == '__main__':
                         elif 'gru' in summa_ofile_dims:
                             param_dim = 'gru'
                         else:
-                            print('Variable %s is not in dimension gru or hru in summa outp'%(param_name))
+                            print('Parameter %s does not have dimensions gru or hru in summa output.\n Check before moving forward.'%(param_name))
                             sys.exit()
                         
                         # create this param variable and fill value
@@ -259,13 +263,17 @@ if __name__ == '__main__':
 
                         # get param value from summa output
                         if param_name != 'routingGammaScale':
+                            
+                            # k_macropore, k_soil, theta_sat with dim (depth, hru).
                             if summa_ofile_dims == ('depth','hru'):
-                                # k_macropore, k_soil, theta_sat (depth, hru)
-                                param_value = ff[param_name][0,:]
-                            elif summa_ofile_dims == ('hru',) or  summa_ofile_dims == ('gru',):
-                                param_value = ff[param_name][:] # other params, (hru) or (gru).
+                                param_value = ff[param_name][0,:] # use the first depth value.
+                            
+                            # other params with dim (hru) or (gru).
+                            elif summa_ofile_dims == ('hru',) or summa_ofile_dims == ('gru',):
+                                param_value = ff[param_name][:] 
+                            
                             else:
-                                print('Parameter %s has dimensions more than gru, hru, depth:'%(param_name), summa_ofile_dims)
+                                print('Parameter %s has dimensions more than gru, hru, depth:\n Check before moving forward.'%(param_name), summa_ofile_dims)
                                 sys.exit()
                         
                         elif param_name == 'routingGammaScale': # calculate a-priori value for GammaScale (gru).
@@ -290,7 +298,7 @@ if __name__ == '__main__':
                         elif 'gru' in summa_ofile_dims:
                             param_dim = 'gru'
                         else:
-                            print('Variable %s is not in dimension gru or hru in summa outp'%(param_name))
+                            print('Parameter %s does not have dimensions gru or hru in summa output.\n Check before moving forward.'%(param_name))
                             sys.exit()
                         
                         # create this param variable if it does not exist

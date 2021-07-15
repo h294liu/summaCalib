@@ -11,9 +11,12 @@ def process_command_line():
     '''Parse the commandline'''
     parser = argparse.ArgumentParser(description='Script to icalculate model evaluation statistics.')
     parser.add_argument('controlFile', help='path of the overall control file.')
-    parser.add_argument('suffix', nargs='?', default='day', type=str,
+    parser.add_argument('path_setting', default='outputPath', type=str,
+                       help='Optional argument. Setting name in fileManger.txt for path of files to be concatenate. \
+                       Example options: outputPath, statePath', )
+    parser.add_argument('suffix', nargs='?', default='', type=str,
                        help='Optional argument. Suffix of summa output files to be concatenate. \
-                       Two options: day, timestep', )
+                       Example options: day, timestep, (none)', )
     args = parser.parse_args()
     return(args)
 
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     # otherwise continue
     args = process_command_line()    
     control_file = args.controlFile
+    path_setting = args.path_setting
     suffix = args.suffix
     
     # read paths from control_file.
@@ -77,14 +81,14 @@ if __name__ == '__main__':
     summa_filemanager = os.path.join(summa_settings_path, summa_filemanager)
 
     # read summa output path and prefix
-    outputPath = read_from_summa_route_control(summa_filemanager, 'outputPath')
+    outputPath = read_from_summa_route_control(summa_filemanager, path_setting)
     outFilePrefix = read_from_summa_route_control(summa_filemanager, 'outFilePrefix')
     
     # -----------------------------------------------------------------------
 
     # # #### 1. Read input and output arguments
     # get list of split summa output files (hard coded)
-    outfilelist = glob((outputPath + outFilePrefix + '_G*_' + suffix +'.nc'))   
+    outfilelist = glob((outputPath + outFilePrefix + '*G*' + suffix +'.nc'))   
     outfilelist.sort()   # not needed, perhaps
     merged_output_file = os.path.join(outputPath,outFilePrefix+'_' + suffix + '.nc') # Be careful. Hard coded.
 
@@ -132,7 +136,7 @@ if __name__ == '__main__':
             hru_vars_num = len(hru_vars)
             for i,file in enumerate(outfilelist):
 
-                print("combining file %d %s" % (i,file))
+#                 print("combining file %d %s" % (i,file))
                 # f = nc.Dataset(os.path.join(outputPath, file))
                 f = nc.Dataset(file)
                 for j in range(gru_vars_num):
