@@ -10,8 +10,8 @@
 
 # import module
 import os, sys, argparse, shutil
-import netCDF4 as nc
 import numpy as np
+import xarray as xr
 
 def process_command_line():
     '''Parse the commandline'''
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # otherwise continue
     args = process_command_line()    
     control_file = args.controlFile
-
+    
     # read paths from control_file
     root_path = read_from_control(control_file, 'root_path')
     domain_name = read_from_control(control_file, 'domain_name')
@@ -98,7 +98,6 @@ if __name__ == '__main__':
     model_dst_path = read_from_control(control_file, 'model_dst_path')
     if model_dst_path == 'default':
         model_dst_path = os.path.join(domain_path, 'model')
-    summa_setting_path = os.path.join(model_dst_path, 'settings/SUMMA')
 
     # read calib path
     calib_path = read_from_control(control_file, 'calib_path')
@@ -118,6 +117,9 @@ if __name__ == '__main__':
 
     # #### 2. Read default param values and lower/upper limits
     # read variable range from Local and Basin param files
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_setting_path = os.path.join(model_dst_path, summa_settings_relpath)
+
     summa_filemanager = read_from_control(control_file, 'summa_filemanager')
     summa_filemanager = os.path.join(summa_setting_path, summa_filemanager)
 
@@ -130,81 +132,140 @@ if __name__ == '__main__':
     basin_param_names, basin_param_default, basin_param_min, basin_param_max = read_basinParam_localParam(basinParam)    
     local_param_names, local_param_default, local_param_min, local_param_max = read_basinParam_localParam(localParam)
 
+    # #### 3. Read a priori param values
+    summa_settings_relpath = read_from_control(control_file, 'summa_settings_relpath')
+    summa_settings_path = os.path.join(model_dst_path, summa_settings_relpath)
 
-    # #### 3. Determine multiplier lower/upper bounds
+    trialParamFile = read_from_summa_route_control(summa_filemanager, 'trialParamFile')
+    trialParamFile = os.path.join(summa_settings_path, trialParamFile)
+
+    trialParamFile_priori = trialParamFile.split('.nc')[0] + '.priori.nc' # a priori param file
+    trialParamFile_priori = os.path.join(summa_settings_path, trialParamFile_priori)
+    
+    param_priori_range = [] # [min priori, max priori]
+    with xr.open_dataset(trialParamFile_priori) as f:
+        for multp_name in object_multps:
+            param_name = multp_name.replace('_multp','')
+            if param_name != 'thickness': 
+                param_priori_array = f[param_name].values
+                param_priori_min = min(param_priori_array[param_priori_array!=0]) 
+                param_priori_max = max(param_priori_array[param_priori_array!=0])
+                
+                if param_priori_min == param_priori_max == 0.0:
+                    print('Error: Parameter %s a prioir value is 0.0, \
+                    so the mutiplier-based calibration is not applicable to it.' %(param_name))
+                    sys.exit()
+                else:
+                    param_priori_range.append([param_priori_min, param_priori_max]) 
+                    
+            elif param_name == 'thickness': 
+                bottom_priori_array = f['heightCanopyBottom'].values
+                top_priori_array = f['heightCanopyTop'].values
+                thickness_priori_array = top_priori_array - bottom_priori_array
+                param_priori_range.append([min(thickness_priori_array[thickness_priori_array!=0]),
+                                           max(thickness_priori_array[thickness_priori_array!=0])])
+
+    # #### 4. Determine multiplier lower/upper bounds
     # Determine min and max for multipliers
     param_bounds_list = []   # list of [param name, initial, lower, upper]. 
-    multp_bounds_list = []   # list of [multilier name, initial, lower, upper]. Note initial = 1.0.
+    multp_bounds_list = []   # list of [multilier name, initial, lower, upper]. 
+    # When lower_bound < 1 < upper_bound, set initial multp = 1.0.
+    # If not, set initial multp = 0.5*(lower_bound + upper_bound).
 
-    for multp_name in object_multps:
-
+    for i in range(len(object_multps)):
+        multp_name = object_multps[i]
         param_name = multp_name.replace('_multp','')
 
         if param_name in local_param_names:
-            index   = local_param_names.index(param_name)
-            param_default = local_param_default[index]
-            param_min = local_param_min[index]
-            param_max = local_param_max[index]
+            if param_name != 'theta_sat': 
+                index   = local_param_names.index(param_name)
+                param_min = local_param_min[index]
+                param_max = local_param_max[index]                
+            elif param_name == 'theta_sat': 
+                index   = local_param_names.index(param_name)
+                param_min = local_param_min[index]
+                param_max = local_param_max[index]   
+                
+                # update param_min based on the following relationship.
+                # min 'theta_sat' should be larger than the max of all other soil_params.
+                with xr.open_dataset(trialParamFile_priori) as f:
+                    soil_params = ['theta_res', 'critSoilWilting', 'critSoilTranspire', 'fieldCapacity']
+                    soil_params_priori_max = []
+                    for soil_param in soil_params:
+                        soil_param_priori_array = f[soil_param].values
+                        soil_params_priori_max.append(max(soil_param_priori_array))
+                    param_min = max([param_min, max(soil_params_priori_max)+0.0001]) 
+                    # +0.0001 is to avoid being the same with the prioir value of any other soil Param.             
 
         elif param_name in basin_param_names:
             if param_name != 'routingGammaScale': 
                 index   = basin_param_names.index(param_name)
-                param_default = basin_param_default[index]
                 param_min = basin_param_min[index]
                 param_max = basin_param_max[index]
                 
             elif param_name == 'routingGammaScale': 
-                # get routingGammaShape values
-                index = basin_param_names.index('routingGammaShape')
-                shape_default = basin_param_default[index]
+                # calculate scale bounds based on GRU river length and runoff velocity.
+                # (1) get routingGammaShape values
+                with xr.open_dataset(trialParamFile_priori) as f:
+                    shape_priori = f['routingGammaShape'].values
 
-                # calculate gru streamline length (m)
+                # (2) calculate gru streamline length (m)
+                # assume GRU is a round circle, take its radius as the mean chennel length. 
                 domain_area = float(read_from_control(control_file, 'domain_area'))
                 nGRU = float(read_from_control(control_file, 'nGRU'))
                 GRU_area = domain_area/nGRU  # mean GRU area in square meter
-                
-                # assume GRU is a round circle, take its radius as the mean chennel length. 
                 GRU_channel_length = np.sqrt(GRU_area/np.pi)  # mean GRU chennel length in meter
 
+                # (3) calculate routingGammaScale lower and upper bounds.
                 # assume lower and upper runoff velocity
-                v_priori, v_lower, v_upper = 1, 0.01, 10 # unit: m/s
-
-                # calculate routingGammaScale default, lower and upper value.
-                param_default  = (GRU_channel_length/v_priori)/shape_default
-                param_min = (GRU_channel_length/v_upper)/shape_default
-                param_max = (GRU_channel_length/v_lower)/shape_default
+                v_lower, v_upper = 0.01, 10 # unit: m/s
+                param_min = (GRU_channel_length/v_upper)/min(shape_priori)
+                param_max = (GRU_channel_length/v_lower)/max(shape_priori)
                 
         elif param_name == 'thickness': 
             # read bottom and top heights
             index = local_param_names.index('heightCanopyBottom')
-            bottom_default = local_param_default[index]
             bottom_min = local_param_min[index]
             bottom_max = local_param_max[index]    
 
             index = local_param_names.index('heightCanopyTop')
-            top_default = local_param_default[index]
             top_min = local_param_min[index]
             top_max = local_param_max[index]    
 
-            # get default thickness and lower/upper bounds
-            param_default  = top_default - bottom_default
+            # get lower/upper bounds
             param_min = top_min - bottom_min
             param_max = top_max - bottom_max
 
         else:
-            print('Parameter %s does not exist in localParam.txt and basinParam.txt'%(param_name))
+            print('Error: Parameter %s does not exist in localParam.txt and basinParam.txt'%(param_name))
             sys.exit()
+        
+        
+        # determine parameter range
+        param_priori_min = param_priori_range[i][0]
+        param_priori_max = param_priori_range[i][1]
+        
+        # determine priori value feature for record.
+        if param_priori_min == param_priori_max:
+            param_priori = param_priori_max
+        else:
+            param_priori = 'non-uniform'
+        param_bounds_list.append([param_name, param_priori, param_min, param_max])
 
-        param_bounds_list.append([param_name, param_default, param_min, param_max])
-        multp_min = float(param_min)/float(param_default)
-        multp_max = float(param_max)/float(param_default)    
-        multp_bounds_list.append([multp_name, 1.0, multp_min, multp_max]) 
+        # determine multiplier range
+        multp_min = float(param_min)/float(param_priori_min)
+        multp_max = float(param_max)/float(param_priori_max)        
+        if multp_max<1: # update initial multiplier when multiplier max is less than one (eg, heightCanopyBottom)
+            multp_initial = np.nanmean([multp_min, multp_max])
+        else:
+            multp_initial = 1.0            
+        multp_bounds_list.append([multp_name, multp_initial, multp_min, multp_max]) 
 
 
-    # #### 4. Save param and multiplier information into text.
+    # #### 5. Save param and multiplier information into text.
     param_bounds = read_from_control(control_file, 'param_bounds')
     param_bounds = os.path.join(calib_path, param_bounds)
-    np.savetxt(param_bounds, param_bounds_list, fmt='%s', delimiter=',',header='SummaParameterName,InitialValue,LowerLimit,UpperLimit.')    
+    np.savetxt(param_bounds, param_bounds_list, fmt='%s', delimiter=',',header='SummaParameterName,A-piroirValue,LowerLimit,UpperLimit.')    
 
     multp_bounds = read_from_control(control_file, 'multp_bounds')
     multp_bounds = os.path.join(calib_path, multp_bounds)
