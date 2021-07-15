@@ -109,7 +109,7 @@ if __name__ == '__main__':
         shutil.copytree(folder_src, folder_dst);
     
     # Move three codes in "scripts" folder to the same same directory as Ostrich.exe.
-    for code in ['submit_model_run.sh', 'submit_get_initial.sh']:
+    for code in ['submit_run_model.sh', 'submit_get_initial.sh']:
         code_src = os.path.join(calib_path, 'scripts', code)
         code_dst = os.path.join(calib_path, code)
         if os.path.exists(code_dst):
