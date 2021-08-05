@@ -364,7 +364,7 @@ if __name__ == '__main__':
                     
                     # plot initial and best obj functions
                     ax[i,j].plot(sample_ids_concat[0], objs_concat[0], 
-                                 'D', markerfacecolor="none", markeredgecolor="darkorange", markersize=4);
+                                 'D', markerfacecolor="none", markeredgecolor="k", markersize=4);
                     ax[i,j].plot(sample_ids_concat[best_indices], objs_concat[best_indices], 
                                  's', markerfacecolor="none", markeredgecolor="red", markersize=4);
 
@@ -378,7 +378,7 @@ if __name__ == '__main__':
                 
                     # plot the initial and best points 
                     ax[i,j].plot(sample_ids_concat[0], output_param_values[0, param_index], 
-                                 'D', markerfacecolor="none", markeredgecolor="darkorange", markersize=4);
+                                 'D', markerfacecolor="none", markeredgecolor="k", markersize=4);
                     
                     best_param_values = output_param_values[best_indices, param_index]
                     ax[i,j].plot(sample_ids_concat[best_indices], best_param_values, 
@@ -422,7 +422,7 @@ if __name__ == '__main__':
                     ax[i,j].get_yaxis().set_visible(False)
                     ax[i,j].plot(np.nan, np.nan, marker='^', color='green', label = 'Objective function')
                     ax[i,j].plot(np.nan, np.nan, marker='o', color='blue', label = 'Parameter sample')
-                    ax[i,j].plot(np.nan, np.nan, 'D', markerfacecolor="none", markeredgecolor="darkorange", markersize=4, label='Initial value')
+                    ax[i,j].plot(np.nan, np.nan, 'D', markerfacecolor="none", markeredgecolor="k", markersize=4, label='A priori value')
                     ax[i,j].plot(np.nan, np.nan, 's', markerfacecolor="none", markeredgecolor="red", markersize=4, label='Best value')
                     ax[i,j].legend(loc = 'center left')
                 else:
