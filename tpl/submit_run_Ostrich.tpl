@@ -1,9 +1,8 @@
 #!/bin/bash
 #SBATCH --account=rpp-kshook
-#SBATCH --time=670:00:00
-#SBATCH --nodes=2
-#SBATCH --cpus-per-task=26
-#SBATCH --mem-per-cpu=1024M
+#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=1024M
 #SBATCH --job-name=xxxxxx
 #SBATCH --output=%x-%j.out
 

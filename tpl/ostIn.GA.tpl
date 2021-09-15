@@ -46,7 +46,7 @@ ParallelMethod synchronous
 PopulationSize 50 
 MutationRate 0.05 
 Survivors 1 
-NumGenerations 130 
+NumGenerations 50 
 InitPopulationMethod LHS 
 ConvergenceVal 1.00E-4 
 EndGeneticAlg

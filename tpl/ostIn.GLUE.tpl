@@ -42,10 +42,10 @@ EndConstraints
 RandomSeed xxxxxxxxx
 
 BeginGLUE
-SamplesPerIter    10
-NumBehavioral     10
-MaxSamples        100
-Threshold         -0.95
+SamplesPerIter    1
+NumBehavioral     45
+MaxSamples        45
+Threshold         -1.0
 EndGLUE
 
 #BeginDDSAlg
