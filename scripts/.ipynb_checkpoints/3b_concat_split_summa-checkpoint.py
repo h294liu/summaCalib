@@ -52,18 +52,21 @@ def read_from_summa_route_control(control_file, setting):
 # Function to read g(h)ru dimensioned variable values and return a dictionary.
 def concat_summa_outputs(file):  
     # Employ global variables: gru_vars_num, gru_vars, hru_vars_num, hru_vars.
-    Dict = {}
     f = nc.Dataset(file) 
+    Dict = {}
+    
+    # Store gruId and hruId into Dict
+    Dict['gruId'] = f.variables['gruId'][:].data
+    Dict['hruId'] = f.variables['hruId'][:].data
+    
     # Read and store variables into Dict
     for j in range(gru_vars_num):
         gru_var_name = gru_vars[j][0]
-        data=f.variables[gru_var_name][:].data
-        Dict[gru_var_name]=data
+        Dict[gru_var_name]=f.variables[gru_var_name][:].data
                 
     for j in range(hru_vars_num):
         hru_var_name = hru_vars[j][0]
-        data=f.variables[hru_var_name][:].data
-        Dict[hru_var_name]=data            
+        Dict[hru_var_name]=f.variables[hru_var_name][:].data
     return Dict
 
 
@@ -117,10 +120,8 @@ if __name__ == '__main__':
     merged_output_file = os.path.join(outputPath,outFilePrefix+'_' + suffix + '.nc') # Be careful. Hard coded.
 
     # # #### 2. Count number of g(h)rus and g(h)ruId list
-    gru_num = 0
-    hru_num = 0
-    gru_list = []
-    hru_list = []
+    gru_num,hru_num = 0, 0
+    gru_list,hru_list = [], []
     for file in outfilelist:
         f = nc.Dataset(file)
         gru_num = gru_num+len(f.dimensions['gru'])
@@ -130,7 +131,6 @@ if __name__ == '__main__':
         hru_list.extend(list(f.variables['hruId'][:].data))
         
     # # #### 3. Get g(h)ru dimensioned variables and build base dictionary for storage
-    Dict = {} 
     with nc.Dataset(outfilelist[0]) as src:
         
         time_num = len(src.dimensions['time'])
@@ -149,6 +149,7 @@ if __name__ == '__main__':
         hru_vars_num = len(hru_vars)
         
         # 3-2. create the base dictionary Dict
+        Dict = {} 
         for j in range(gru_vars_num):
             gru_var_name = gru_vars[j][0]
             dim_index = gru_vars[j][1]
@@ -175,15 +176,14 @@ if __name__ == '__main__':
     print('concatenate outputs')
     start_time = datetime.now()   
     with concurrent.futures.ProcessPoolExecutor() as executor:    
-        for file_i, Dict_i in zip(outfilelist, executor.map(concat_summa_outputs, outfilelist)):
-            f = nc.Dataset(file_i) 
-
-            # get gru and hru indices of file_i
-            gruId = list(f.variables['gruId'][:].data)
+        for Dict_i in executor.map(concat_summa_outputs, outfilelist):
+            
+            # get gru and hru indices of Dict_i
+            gruId = Dict_i['gruId']
             gru_start_idx = gru_list.index(gruId[0])
             gru_end_idx = gru_list.index(gruId[-1])
 
-            hruId = list(f.variables['hruId'][:].data)
+            hruId = Dict_i['hruId']
             hru_start_idx = hru_list.index(hruId[0])
             hru_end_idx = hru_list.index(hruId[-1])
 
