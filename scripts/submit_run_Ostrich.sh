@@ -1,15 +1,14 @@
 #!/bin/bash
-#SBATCH --account=rpp-kshook
-#SBATCH --time=670:00:00
-#SBATCH --nodes=2
-#SBATCH --cpus-per-task=26
-#SBATCH --mem-per-cpu=1024M
-#SBATCH --job-name=SCE3
-#SBATCH --output=%x-%j.out
+#PBS -N 3_DDS5
+#PBS -A P48500028
+#PBS -q regular
+#PBS -l select=2:ncpus=36:mpiprocs=36
+#PBS -l walltime=12:00:00
+#PBS -o 3_DDS5.out
+#PBS -e 3_DDS5.err
 
-mkdir -p /home/h294liu/scratch/temp
-export TMPDIR=/home/h294liu/scratch/temp
-export MPI_SHEPHERD=true
+TmpDir=/glade/scratch/hongli/temp
+mkdir -p $TmpDir
 
 #### Note: This bash file must be put in the same directory as Ostrich.exe.
 

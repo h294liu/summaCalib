@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=rpp-kshook
-#SBATCH --time=52:00:00
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=36
+#SBATCH --time=100:00:00
+#SBATCH --nodes=2
+#SBATCH --cpus-per-task=26
 #SBATCH --mem-per-cpu=1024M
 #SBATCH --job-name=test_calib
 #SBATCH --output=%x-%j.out

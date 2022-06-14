@@ -1,14 +1,14 @@
 # Ostrich configuration file
 # Authors: Hong Liu, Andrew Wood. 
 
-ProgramType  DDS
+ProgramType  GLUE
 ModelExecutable ./run_trial.sh
 ObjectiveFunction gcop
 
 OstrichWarmStart no
 
+PreserveModelOutput ./save_model_output.sh
 PreserveBestModel ./save_best.sh
-PreserveModelOutput no
 OnObsError	-999
 
 BeginFilePairs    
@@ -41,12 +41,19 @@ EndConstraints
 # Randomsed control added
 RandomSeed xxxxxxxxx
 
-BeginDDSAlg
-PerturbationValue 0.20
-MaxIterations 400 
-#UseRandomParamValues
-UseInitialParamValues
-EndDDSAlg
+BeginGLUE
+SamplesPerIter    1
+NumBehavioral     40
+MaxSamples        40
+Threshold         -1.0
+EndGLUE
+
+#BeginDDSAlg
+#PerturbationValue 0.20
+#MaxIterations 400 
+##UseRandomParamValues
+#UseInitialParamValues
+#EndDDSAlg
 
 # can attempt this to polish the earlier DDS results (use with WARM start)
 #BeginFletchReevesAlg

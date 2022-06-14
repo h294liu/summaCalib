@@ -1,5 +1,5 @@
 #!/bin/bash
-# needs editing to update for current basin and run
+# save use-specifed files every time a bew best paraemter set is discovered.
 
 control_file="control_active.txt"
 
@@ -22,7 +22,7 @@ read_from_summa_route_control () {
     
     line=$(grep -m 1 "^${setting}" $input_file) 
     info=$(echo ${line%%!*}) # remove the part starting at '!'
-    info=$(echo ${info##* }) # get string after space
+    info="$( cut -d ' ' -f 2- <<< "$info" )" # get string after the first space
     info="${info%\'}" # remove the suffix '. Do nothing if no '.
     info="${info#\'}" # remove the prefix '. Do nothing if no '.
     echo $info
@@ -34,7 +34,8 @@ read_from_summa_route_control () {
 # Get common paths.
 root_path="$(read_from_control $control_file "root_path")"
 domain_name="$(read_from_control $control_file "domain_name")"
-domain_path=${root_path}/${domain_name}
+complexity_level="$(read_from_control $control_file "complexity_level")"        
+domain_path=${root_path}/${complexity_level}_${domain_name}
 
 # Get calib path.
 calib_path="$(read_from_control $control_file "calib_path")"
@@ -54,8 +55,6 @@ summa_filemanager="$(read_from_control $control_file "summa_filemanager")"
 summa_filemanager=$summa_settings_path/$summa_filemanager
 route_control="$(read_from_control $control_file "route_control")"
 route_control=$route_settings_path/$route_control
-echo $summa_filemanager
-echo $route_control
 
 # Extract summa output path and prefix from fileManager.txt.
 summa_outputPath="$(read_from_summa_route_control $summa_filemanager "outputPath")"
@@ -64,8 +63,6 @@ summa_outFilePrefix="$(read_from_summa_route_control $summa_filemanager "outFile
 # Extract summa parameter file from fileManager.txt.
 trialParamFile="$(read_from_summa_route_control $summa_filemanager "trialParamFile")"
 trialParamFile_priori=${trialParamFile%\.nc}.priori.nc
-echo $trialParamFile
-echo $trialParamFile_priori
 
 trialParamFile=$summa_settings_path/$trialParamFile
 trialParamFile_priori=$summa_settings_path/$trialParamFile_priori
@@ -86,10 +83,13 @@ multp_value="$(read_from_control $control_file "multp_value")"
 # --------------------------------------- Save --------------------------------------------
 # -----------------------------------------------------------------------------------------
 
-outDir="${calib_path}/output_archive/$experiment_id/"
+outDir="${calib_path}/output_archive/experiment$experiment_id"
 mkdir -p $outDir
 
-echo "saving input files for the best solution found in $outDir ..."
+echo "saving input and output files for the best solution."
+
+# save control_file
+cp $calib_path/$control_file $outDir/
 
 # save multipliers.txt.
 cp $calib_path/$multp_value $outDir/
@@ -101,8 +101,8 @@ cp $route_control $outDir/
 cp $trialParamFile $outDir/
 cp $trialParamFile_priori $outDir/
 
-cp $summa_outputPath/${summa_outFilePrefix}_timestep.nc $outDir/
-cp $route_outputPath/${summa_outFilePrefix}*.nc $outDir/
+cp $summa_outputPath/${summa_outFilePrefix}_day.nc $outDir/
+cp $route_outputPath/${summa_outFilePrefix}.mizuRoute.nc $outDir/
 
 # save model performance evaluation result and Ostrich output files.
 cp $stat_output $outDir/

@@ -99,7 +99,8 @@ if __name__ == '__main__':
     # read paths from control_file.
     root_path = read_from_control(control_file, 'root_path')
     domain_name = read_from_control(control_file, 'domain_name')
-    domain_path = os.path.join(root_path, domain_name)
+    complexity_level = read_from_control(control_file, 'complexity_level')        
+    domain_path = os.path.join(root_path, complexity_level+'_'+domain_name)
 
     # read new hydrologic model path from control_file.
     model_dst_path = read_from_control(control_file, 'model_dst_path')
@@ -123,10 +124,6 @@ if __name__ == '__main__':
     output_dir = read_from_summa_route_control(route_control, '<output_dir>')
     route_outFilePrefix=read_from_summa_route_control(route_control, "<case_name>")
     
-    # (input) define mizuRoute output file name based on mizuRoute source code "write_simoutput.f90".    
-    route_outFileList = glob.glob(output_dir+'/'+route_outFilePrefix+'.*.nc')
-    route_outFileList.sort()
-    
     # (input) segment id, observations, statistics relevant configs.
     q_seg_index = int(read_from_control(control_file, 'q_seg_index')) # start from one.
     
@@ -148,7 +145,7 @@ if __name__ == '__main__':
     # #### 2. Calculate 
     # --- read simulated flow (cms) --- 
     simVarName = 'IRFroutedRunoff'
-    simFile = os.path.join(output_dir, route_outFilePrefix+'.nc') # Hard coded file name. Be careful.
+    simFile = os.path.join(output_dir, route_outFilePrefix+'.mizuRoute.nc') # Hard coded file name. Be careful.
     f    = xr.open_dataset(simFile)
     time = f['time'].values
     sim  = f[simVarName][:,(q_seg_index-1)].values #(time, segments)

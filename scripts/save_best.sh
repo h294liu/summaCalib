@@ -34,7 +34,8 @@ read_from_summa_route_control () {
 # Get common paths.
 root_path="$(read_from_control $control_file "root_path")"
 domain_name="$(read_from_control $control_file "domain_name")"
-domain_path=${root_path}/${domain_name}
+complexity_level="$(read_from_control $control_file "complexity_level")"        
+domain_path=${root_path}/${complexity_level}_${domain_name}
 
 # Get calib path.
 calib_path="$(read_from_control $control_file "calib_path")"

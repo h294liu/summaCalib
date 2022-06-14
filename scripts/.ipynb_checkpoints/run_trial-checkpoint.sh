@@ -28,7 +28,7 @@ read_from_summa_route_control () {
     
     line=$(grep -m 1 "^${setting}" $input_file) 
     info=$(echo ${line%%!*}) # remove the part starting at '!'
-    info=$(echo ${info##* }) # get string after space
+    info="$( cut -d ' ' -f 2- <<< "$info" )" # get string after the first space
     info="${info%\'}" # remove the suffix '. Do nothing if no '.
     info="${info#\'}" # remove the prefix '. Do nothing if no '.
     echo $info
@@ -40,7 +40,8 @@ read_from_summa_route_control () {
 # Get common paths.
 root_path="$(read_from_control $control_file "root_path")"
 domain_name="$(read_from_control $control_file "domain_name")"
-domain_path=${root_path}/${domain_name}
+complexity_level="$(read_from_control $control_file "complexity_level")"        
+domain_path=${root_path}/${complexity_level}_${domain_name}
 
 # Get calib path.
 calib_path="$(read_from_control $control_file "calib_path")"
@@ -105,6 +106,7 @@ echo Running and routing
 
 # (1) Create summa output path if it does not exist; and remove previous outputs.
 if [ ! -d $summa_outputPath ]; then mkdir -p $summa_outputPath; fi
+echo $summa_outputPath
 rm -f $summa_outputPath/${summa_outFilePrefix}*
 
 # (2) Run Summa (split domain) and concatenate/adjust output for routing.
@@ -117,11 +119,12 @@ for gru in $(seq 1 $nGRU); do
 done
 wait
 
-# (3) Merge output runoff into one file for routing.
+# (3) Merge daily output runoff into one file for routing.
 echo concatenating output files in $summa_outputPath
-python $calib_path/scripts/3b_concat_split_summa.py $control_file
+python $calib_path/scripts/3b_concat_split_summa.py $control_file outputPath day
 
 # (4) Shift output time back 1 day for routing model - only if computing daily outputs!
+# Summa use end of time step for time values, but mizuRoute use beginning of time step.
 # Be careful. Hard coded file name "xxx_day.nc". Valid for daily simulation.
 ncap2 -O -s 'time[time]=time-86400' $summa_outputPath/$summa_outFilePrefix\_day.nc $summa_outputPath/$summa_outFilePrefix\_day.nc
 
@@ -132,13 +135,14 @@ date | awk '{printf("%s: routing summa\n",$0)}' >> $calib_path/timetrack.log
 
 # (1) Create mizuRoute output path if it does not exist; and remove existing outputs.
 if [ ! -d $route_outputPath ]; then mkdir -p $route_outputPath; fi
+echo $route_outputPath
 rm -f $route_outputPath/${route_outFilePrefix}*
 
 # (2) Run mizuRoute.
 ${routeExe} $route_control
 
 # (3) Merge output runoff into one file for statistics calculation.
-ncrcat -O -v time,reachID,IRFroutedRunoff -h $route_outputPath/${route_outFilePrefix}* $route_outputPath/${route_outFilePrefix}.nc
+ncrcat -O -h $route_outputPath/${route_outFilePrefix}* $route_outputPath/${route_outFilePrefix}.mizuRoute.nc
 
 # ------------------------------------------------------------------------------
 # --- 4.  calculate statistics for Ostrich                                   ---
@@ -146,8 +150,8 @@ ncrcat -O -v time,reachID,IRFroutedRunoff -h $route_outputPath/${route_outFilePr
 echo calculating statistics
 date | awk '{printf("%s: calculating statistics\n",$0)}' >> $calib_path/timetrack.log
 
-# (1) Remove the stats output file to make sure it is created properly with every run.
-rm -f $stat_output
+# # (1) Remove the stats output file to make sure it is created properly with every run.
+# rm -f $stat_output
 
 # (2) Calculate statistics.
 python $calib_path/scripts/3c_calc_sim_stats.py $control_file

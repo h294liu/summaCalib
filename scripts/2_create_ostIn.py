@@ -49,7 +49,8 @@ if __name__ == '__main__':
     # read paths from control_file
     root_path = read_from_control(control_file, 'root_path')
     domain_name = read_from_control(control_file, 'domain_name')
-    domain_path = os.path.join(root_path, domain_name)
+    complexity_level = read_from_control(control_file, 'complexity_level')        
+    domain_path = os.path.join(root_path, complexity_level+'_'+domain_name)
 
     # read calib path
     calib_path = read_from_control(control_file, 'calib_path')

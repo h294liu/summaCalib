@@ -40,7 +40,8 @@ read_from_summa_route_control () {
 # Get common paths.
 root_path="$(read_from_control $control_file "root_path")"
 domain_name="$(read_from_control $control_file "domain_name")"
-domain_path=${root_path}/${domain_name}
+complexity_level="$(read_from_control $control_file "complexity_level")"        
+domain_path=${root_path}/${complexity_level}_${domain_name}
 
 # Get calib path.
 calib_path="$(read_from_control $control_file "calib_path")"
@@ -105,6 +106,7 @@ echo Running and routing
 
 # (1) Create summa output path if it does not exist; and remove previous outputs.
 if [ ! -d $summa_outputPath ]; then mkdir -p $summa_outputPath; fi
+echo $summa_outputPath
 rm -f $summa_outputPath/${summa_outFilePrefix}*
 
 # (2) Run Summa (split domain) and concatenate/adjust output for routing.
@@ -133,6 +135,7 @@ date | awk '{printf("%s: routing summa\n",$0)}' >> $calib_path/timetrack.log
 
 # (1) Create mizuRoute output path if it does not exist; and remove existing outputs.
 if [ ! -d $route_outputPath ]; then mkdir -p $route_outputPath; fi
+echo $route_outputPath
 rm -f $route_outputPath/${route_outFilePrefix}*
 
 # (2) Run mizuRoute.

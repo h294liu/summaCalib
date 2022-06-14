@@ -5,7 +5,8 @@
 # #### Update intput file name <fname_qsim> in mizuroute.control (eg, "run1_day.nc") ####
 
 # import module
-import os, sys, argparse, shutil, datetime
+import os, sys, argparse, shutil
+from datetime import datetime
 import netCDF4 as nc
 import numpy as np
 
@@ -61,7 +62,8 @@ if __name__ == '__main__':
     # read paths from control_file.
     root_path = read_from_control(control_file, 'root_path')
     domain_name = read_from_control(control_file, 'domain_name')
-    domain_path = os.path.join(root_path, domain_name)
+    complexity_level = read_from_control(control_file, 'complexity_level')        
+    domain_path = os.path.join(root_path, complexity_level+'_'+domain_name)
 
     # read new hydrologic model path.
     model_dst_path = read_from_control(control_file, 'model_dst_path')
@@ -74,7 +76,12 @@ if __name__ == '__main__':
 
     # read simulation start and end time from control_file.
     simStartTime = read_from_control(control_file, 'simStartTime')
-    simEndTime = read_from_control(control_file, 'simEndTime')
+    simEndTime = read_from_control(control_file, 'simEndTime') # HH:MM can be 23:59, but not 24:00. 
+    print(simStartTime,simEndTime)
+    
+    # extract year-month-day, exclude hour-min-sec.
+    simStartDate = datetime.strftime(datetime.strptime(simStartTime, '%Y-%m-%d %H:%M'), '%Y-%m-%d')
+    simEndDate = datetime.strftime(datetime.strptime(simEndTime, '%Y-%m-%d %H:%M'), '%Y-%m-%d')
 
     # #### 1. Update fileManager.txt by changing simStartTime and simEndTime. 
     # identify fileManager.txt and a temporary file. 
@@ -90,10 +97,10 @@ if __name__ == '__main__':
             for line in src:
                 if line.startswith('simStartTime'):
                     simStartTime_old = line.split('!',1)[0].strip().split(None,1)[1]
-                    line = line.replace(simStartTime_old, simStartTime)
+                    line = line.replace(simStartTime_old, "'"+simStartTime+"'")
                 elif line.startswith('simEndTime'):
                     simEndTime_old = line.split('!',1)[0].strip().split(None,1)[1]
-                    line = line.replace(simEndTime_old, simEndTime)
+                    line = line.replace(simEndTime_old, "'"+simEndTime+"'")
                 dst.write(line)
     shutil.copy2(summa_filemanager_temp, summa_filemanager);
     os.remove(summa_filemanager_temp);
@@ -112,11 +119,11 @@ if __name__ == '__main__':
         with open(route_control_temp, 'w') as dst:
             for line in src:
                 if line.startswith('<sim_start>'):
-                    simStartTime_old = line.split('!',1)[0].strip().split(None,1)[1]
-                    line = line.replace(simStartTime_old, simStartTime)
+                    simStartDate_old = line.split('!',1)[0].strip().split(None,1)[1]
+                    line = line.replace(simStartDate_old, simStartDate)
                 elif line.startswith('<sim_end>'):
-                    simEndTime_old = line.split('!',1)[0].strip().split(None,1)[1]
-                    line = line.replace(simEndTime_old, simEndTime)
+                    simEndDate_old = line.split('!',1)[0].strip().split(None,1)[1]
+                    line = line.replace(simEndDate_old, simEndDate)
                 elif line.startswith('<fname_qsim>'):
                     fname_qsim_old = line.split('!',1)[0].strip().split(None,1)[1] # filename of input runoff from summa
                     outFilePrefix = read_from_summa_route_control(summa_filemanager, 'outFilePrefix') # summa outout FilePrefix
