@@ -85,7 +85,8 @@ if __name__ == '__main__':
     # #### 2. Write ostIn.txt based on ostIn.tpl
     
     # identify ostIn template and txt file.
-    ostIn_src = os.path.join(calib_tpl_path, 'ostIn.tpl')
+    ostIn_tpl = read_from_control(control_file, 'ostIn_tpl')
+    ostIn_src = os.path.join(calib_tpl_path, ostIn_tpl)
     ostIn_dst = os.path.join(calib_path, 'ostIn.txt')
 
     # check if template ostIn file exists.
@@ -122,7 +123,7 @@ if __name__ == '__main__':
                         add_line = ('%s; %s\n')%(tpl_relpath, value_relpath)                                
                         dst.write(add_line)
 
-                    # (2) add param configurations 
+                    # (2) add param ranges 
                     if number==param_line_number:
                         for i in range(len(multp_bounds_arr)):
                             # identify param configs
