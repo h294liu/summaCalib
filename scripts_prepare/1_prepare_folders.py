@@ -14,7 +14,7 @@ from os.path import dirname, abspath
 def process_command_line():
     '''Parse the commandline'''
     parser = argparse.ArgumentParser(description='Script to icalculate model evaluation statistics.')
-    parser.add_argument('control_tpl', help='path of the template control file.')
+    parser.add_argument('control_file', help='path of the template control file.')
     args = parser.parse_args()
     return(args)
 
@@ -40,16 +40,16 @@ if __name__ == '__main__':
     # --- process command line --- 
     # check args
     if len(sys.argv) != 2:
-        print("Usage: %s <control_tpl>" % sys.argv[0])
+        print("Usage: %s <control_file>" % sys.argv[0])
         sys.exit(0)
     # otherwise continue
     args = process_command_line()    
-    control_tpl = args.control_tpl
+    control_file = args.control_file
     
     
-    # #### Copy template control file into 'control_active.txt'
-    control_file = 'control_active.txt'
-    shutil.copyfile(control_tpl, control_file);
+#     # #### Copy template control file into 'control_active.txt'
+#     control_file = 'control_active.txt'
+#     shutil.copyfile(control_tpl, control_file);
 
     
     # ####  Make folders  
@@ -109,7 +109,8 @@ if __name__ == '__main__':
         shutil.copytree(folder_src, folder_dst);
     
     # Move three codes in "scripts" folder to the same same directory as Ostrich.exe.
-    for code in ['submit_Ostrich_run.sh', 'run_trial.sh', 'save_best.sh']:
+    for code in ['submit_run_Ostrich.sh', 'run_trial.sh', 'save_best.sh', 
+                 'save_model_output.sh']:
         code_src = os.path.join(calib_path, 'scripts', code)
         code_dst = os.path.join(calib_path, code)
         if os.path.exists(code_dst):

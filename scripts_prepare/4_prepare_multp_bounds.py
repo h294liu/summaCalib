@@ -159,10 +159,9 @@ if __name__ == '__main__':
             
             param_priori_array_shp = np.shape(param_priori_array)
             param_priori_ma = np.ma.masked_array(param_priori_array, mask=(param_priori_array==0.0))
-            if np.all(param_priori_array == 0.0):
-                print('Warning: Parameter %s a-prioir values are all 0.0, \
-                so the mutiplier-based calibration is not applicable. \
-                Multiplier range i set zero in this case.' %(param_name))
+            if all(param_priori_array == 0.0):
+                print('Error: Parameter %s a-prioir values are all 0.0, \
+                so the mutiplier-based calibration is not applicable to it.' %(param_name))
                 sys.exit()
         
             # (2) get param upper and lower limits                
@@ -180,7 +179,7 @@ if __name__ == '__main__':
                         soil_params = ['theta_res', 'critSoilWilting', 'critSoilTranspire', 'fieldCapacity']
 
                         # collect a-priori values
-                        soil_params_priori_layers = np.ones((f[param_name].size,len(soil_params)+1))                    
+                        soil_params_priori_layers = np.ones((len(f[param_name]),len(soil_params)+1))                    
                         for i in range(len(soil_params)):
                             soil_param = soil_params[i]
                             soil_params_priori_layers[:,i] = f[soil_param].values
@@ -199,17 +198,21 @@ if __name__ == '__main__':
                     # calculate scale bounds based on GRU river length and runoff velocity.
                     # (a) calculate gru streamline length (m)
                     # assume GRU is a round circle, take its radius as the mean chennel length. 
-                    domain_area = float(read_from_control(control_file, 'domain_area'))
-                    nGRU = float(read_from_control(control_file, 'nGRU'))
+                    
+                    attributeFile = read_from_summa_route_control(summa_filemanager, 'attributeFile')
+                    attributeFile = os.path.join(summa_setting_path, attributeFile)
+                    with xr.open_dataset(attributeFile) as ds:
+                        nGRU = ds.dims['gru']
+                        domain_area = ds['HRUarea'].values.sum()
+
                     GRU_area = domain_area/nGRU  # mean GRU area in square meter
                     GRU_channel_length = np.sqrt(GRU_area/np.pi)  # mean GRU chennel length in meter
 
                     # (b) calculate routingGammaScale lower and upper bounds.
                     # assume lower and upper runoff velocity
                     v_lower, v_upper = 0.1, 10 # unit: m/s # v_lower, v_upper = 0.01, 10
-                    routingGammaShape_priori = f['routingGammaShape'].values
-                    param_min = np.divide((GRU_channel_length/v_upper), routingGammaShape_priori)
-                    param_max = np.divide((GRU_channel_length/v_lower), routingGammaShape_priori)
+                    param_min = np.divide((GRU_channel_length/v_upper), param_priori_array)
+                    param_max = np.divide((GRU_channel_length/v_lower), param_priori_array)
 
             elif param_name == 'thickness': 
                 # read bottom and top heights
@@ -231,18 +234,11 @@ if __name__ == '__main__':
 
 
             # (3) determine multiplier feasible range
-            if np.all(param_priori_array == 0.0):
-                print('Warning: Parameter %s a-prioir values are all 0.0, \
-                so the mutiplier-based calibration is not applicable. \
-                Multiplier min and max are set multp_initial in this case.' %(param_name))
-                multp_min = multp_initial
-                multp_max = multp_initial
-            else:
-                multp_min = np.max(param_min/param_priori_ma)
-                multp_max = np.min(param_max/param_priori_ma)
+            multp_min = np.max(param_min/param_priori_ma)
+            multp_max = np.min(param_max/param_priori_ma)
             
-            if multp_min>multp_max:
-                print('Error: %s multiplier does not have a feasible range (multp_min>multp_max).'%(param_name))
+            if multp_min>=multp_max:
+                print('Error: %s multiplier does not have a feasible range (multp_min>=multp_max).'%(param_name))
                 sys.exit()
     
             # (4) update initial multiplier value.
